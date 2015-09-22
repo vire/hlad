@@ -4,22 +4,11 @@ import path from 'path';
 import request from 'superagent';
 import jsdom from 'jsdom';
 import { prettyPrint } from './utils';
+import loadRecipes from './recipe-loader';
 
 const readdir = Promise.promisify(fs.readdir);
 const readFile = Promise.promisify(fs.readFile);
 const jQuery = fs.readFileSync(path.resolve(__dirname + './../node_modules/jquery/dist/jquery.js'), 'utf-8');
-
-const _loadRecipes = () => {
-  return new Promise(resolve => {
-    readdir(publicAPI._recipeFolder)
-      .then((fileNames) => {
-        const _tmp = fileNames.map(fileName => {
-          return readFile(`${publicAPI._recipeFolder}/${fileName}`, 'utf-8');
-        });
-        resolve(Promise.all(_tmp));
-      });
-  });
-};
 
 const _getDOM = (response, jQuery) => {
   return new Promise((resolve, reject) => {
@@ -44,7 +33,7 @@ const crawl = () => {
   console.log('I am crawling');
 
   publicAPI._crawlPromise = new Promise((resolve) => {
-    _loadRecipes()
+    loadRecipes(publicAPI._recipeFolder)
       .then(recipes => {
         const requests = recipes
           .map((r, idx) => {

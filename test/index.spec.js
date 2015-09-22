@@ -1,18 +1,33 @@
 /*eslint-env node, mocha */
-import crawler from '../src/crawler';
-import chai from 'chai';
-const expect = chai.expect;
 
-describe('test', function () {
-  it('should work', function () {
-    expect(1).to.equal(1);
+import crawler from '../src/crawler';
+import chaiAsPromised from 'chai-as-promised';
+import chai from 'chai';
+import path from 'path';
+import fs from 'fs';
+
+const expect = chai.expect;
+const testPath = path.resolve(__dirname + '/test-recipes');
+chai.use(chaiAsPromised);
+
+import loadRecipes from '../src/recipe-loader';
+
+describe('RecipeLoader', () => {
+
+  it('.loadRecipes returns the expected recipe files', (done) => {
+    const testRecipe = fs.readFileSync(`${testPath}/test-recipe-01.json`, 'utf-8');
+    const expectedResult = [testRecipe];
+
+    expect(loadRecipes(testPath))
+      .eventually
+      .deep.equal(expectedResult)
+      .notify(done);
   });
 });
 
 describe('Crawler', () => {
   it('should exist', () => {
-    console.log('Crawler', crawler);
-    // expect(crawler).to.not.be.null;
+    expect(crawler).to.not.be.null;
   });
   xit('should load recipe from `/recipes` folder');
   xit('should add crawling response to `results` JSON');
