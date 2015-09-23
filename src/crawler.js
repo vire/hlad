@@ -5,9 +5,10 @@ import request from 'superagent';
 import jsdom from 'jsdom';
 import { prettyPrint } from './utils';
 import loadRecipes from './recipe-loader';
+var superagentConfig = require('./superagent-config');
 
-const readdir = Promise.promisify(fs.readdir);
-const readFile = Promise.promisify(fs.readFile);
+//Before tests
+require('superagent-mock')(request, superagentConfig);
 const jQuery = fs.readFileSync(path.resolve(__dirname + './../node_modules/jquery/dist/jquery.js'), 'utf-8');
 
 const _getDOM = (response, jQuery) => {
@@ -30,7 +31,7 @@ const _getDOM = (response, jQuery) => {
 };
 
 const crawl = () => {
-  console.log('I am crawling');
+  publicAPI.log('I am crawling');
 
   publicAPI._crawlPromise = new Promise((resolve) => {
     loadRecipes(publicAPI._recipeFolder)
@@ -41,12 +42,15 @@ const crawl = () => {
               return new Promise((innerResolve) => {
                 // to not overhaul the target server
                 setTimeout(() => {
-                  console.log('Executing API call!', new Date().toISOString());
+                  publicAPI.log('Executing API call!', new Date().toISOString());
+                  publicAPI.log('Calling URL: ', JSON.parse(r).url);
                   request.get(JSON.parse(r).url)
                     .then(result => innerResolve({
                       recipe: r,
                       text: result.text,
-                    }));
+                    }), (error) => {
+                      console.log('error', error);
+                    });
                 }, (idx + 1) * 1000);
               });
             } ());
@@ -97,28 +101,38 @@ const publish = ({token, channelID, URL}) => {
     throw new Error('You must pass token and channelID');
   }
 
-  _extract()
-    .then(extractResult => {
-      request
-        .post(URL)
-        .query({
-          token: token,
-          channel: channelID,
-          as_user: false,
-          text: prettyPrint(extractResult),
-        })
-        .then(() => {
-          console.log('JOB DONE!');
-        }, (err) => {
-          console.error('An error occured during posting:', err);
-        });
-    });
-
-  return publicAPI;
+  return new Promise((resolve, reject) => {
+    _extract()
+      .then(extractResult => {
+        publicAPI.log('POST URL: ', URL);
+        request
+          .post(URL)
+          .query({
+            token: token,
+            channel: channelID,
+            as_user: false,
+            text: prettyPrint(extractResult),
+          })
+          .then((res) => {
+            publicAPI.log('JOB DONE!');
+            resolve({
+              res,
+              extractResult,
+            });
+          }, (err) => {
+            console.error('An error occured during posting:', err);
+          });
+      });
+  });
 };
 
 const publicAPI = {
   _recipeFolder: null,
+  log(message) {
+    if(this._logToConsole) {
+      console.log(message);
+    }
+  },
   crawl,
   publish,
 };

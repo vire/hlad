@@ -4,7 +4,6 @@ const readdir = Promise.promisify(fs.readdir);
 const readFile = Promise.promisify(fs.readFile);
 
 export default function(pathToFolder) {
-  console.log('pathToFolder',pathToFolder);
   return new Promise(resolve => {
     readdir(pathToFolder)
       .then((fileNames) => {

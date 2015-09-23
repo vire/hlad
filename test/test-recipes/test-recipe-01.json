@@ -13,8 +13,6 @@
       "locator": "#menus > div:nth-child(2)"
     }, {
       "locator": "#menus > div:nth-child(3)"
-    }, {
-      "locator": "#menus > div:nth-child(4)"
     }]
   }
 }
