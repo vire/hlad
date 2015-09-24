@@ -49,9 +49,9 @@ const crawl = () => {
                       recipe: r,
                       text: result.text,
                     }), (error) => {
-                      console.log('error', error);
+                      publicAPI.log('error', error);
                     });
-                }, (idx + 1) * 1000);
+                }, (idx + 1) * publicAPI._reqTimeout);
               });
             } ());
           });
@@ -86,10 +86,7 @@ const _extract = () => {
         };
       });
 
-      if (publicAPI._logToConsole) {
-        console.log('Crawl Result: ', prettyPrint(_tmp));
-      }
-
+      publicAPI.log('Crawl Result: ', prettyPrint(_tmp));
       resolve(_tmp);
     });
   });
@@ -101,10 +98,10 @@ const publish = ({token, channelID, URL}) => {
     throw new Error('You must pass token and channelID');
   }
 
-  return new Promise((resolve, reject) => {
-    _extract()
-      .then(extractResult => {
-        publicAPI.log('POST URL: ', URL);
+  return _extract()
+    .then(extractResult => {
+      publicAPI.log('POST URL: ', URL);
+      return new Promise((resolve, reject) => {
         request
           .post(URL)
           .query({
@@ -113,32 +110,35 @@ const publish = ({token, channelID, URL}) => {
             as_user: false,
             text: prettyPrint(extractResult),
           })
-          .then((res) => {
+          .end((err, res) => {
             publicAPI.log('JOB DONE!');
             resolve({
               res,
               extractResult,
-            });
+            })
           }, (err) => {
             console.error('An error occured during posting:', err);
           });
-      });
-  });
+      })
+    });
 };
+
+const log = (message) => {
+  if(publicAPI._loggingEnabled) {
+    console.log(message);
+  }
+}
 
 const publicAPI = {
   _recipeFolder: null,
-  log(message) {
-    if(this._logToConsole) {
-      console.log(message);
-    }
-  },
+  log,
   crawl,
   publish,
 };
 
-export default ({recipeFolder, log}) => {
+export default ({recipeFolder, loggingEnabled, reqTimeout = 1000}) => {
   publicAPI._recipeFolder = recipeFolder;
-  publicAPI._logToConsole = log;
+  publicAPI._loggingEnabled = loggingEnabled;
+  publicAPI._reqTimeout = reqTimeout
   return publicAPI;
 };

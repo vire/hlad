@@ -6,7 +6,7 @@ var folder = __dirname + '/recipes';
 
 crawler({
   recipeFolder: folder,
-  log: true,
+  loggingEnabled: true,
 })
   .crawl()
   .publish({

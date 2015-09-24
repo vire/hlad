@@ -38,6 +38,7 @@ describe('Crawler', () => {
     crawler({
       recipeFolder: testPath,
       log: false,
+      reqTimeout: 0,
     })
       .crawl()
       .publish({
@@ -46,6 +47,7 @@ describe('Crawler', () => {
         channelID: 'SOME_CHANNEL_ID',
       })
       .then((result) => {
+        console.log('result', result);
         expect(result.res.code).to.equal(201);
         expect(result.extractResult).to.deep.equal(expectedResult);
         done();
