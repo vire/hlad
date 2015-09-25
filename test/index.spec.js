@@ -32,7 +32,7 @@ describe('Crawler', () => {
     const expectedResult = [{
       name: 'Test restaurant',
       soups: ['Some soup1', 'Some soup2'],
-      dishes: ['Menu 1', 'Menu 2', 'Menu 3'],
+      dishes: ['Menu 1', 'Menu 3'],
     }];
 
     crawler({
@@ -47,7 +47,6 @@ describe('Crawler', () => {
         channelID: 'SOME_CHANNEL_ID',
       })
       .then((result) => {
-        console.log('result', result);
         expect(result.res.code).to.equal(201);
         expect(result.extractResult).to.deep.equal(expectedResult);
         done();

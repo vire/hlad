@@ -74,15 +74,22 @@ const _extract = () => {
     publicAPI._crawlPromise.then((results) => {
       const _tmp = results.map((res) => {
         const recipe = JSON.parse(res.response.recipe);
+        const soups = recipe.structure.soups
+          .map(soup => {
+            return res.window.$(soup.locator).text().trim();
+          })
+          .filter(item => item !== '');
+
+        const dishes = recipe.structure.main
+          .map(mainDish => {
+            return res.window.$(mainDish.locator).text().trim();
+          })
+          .filter(item => item !== '');
 
         return {
           name: recipe.name,
-          soups: recipe.structure.soups.map(soup => {
-            return res.window.$(soup.locator).text().trim();
-          }),
-          dishes: recipe.structure.main.map(mainDish => {
-            return res.window.$(mainDish.locator).text().trim();
-          }),
+          soups,
+          dishes,
         };
       });
 

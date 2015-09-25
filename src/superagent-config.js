@@ -30,15 +30,20 @@ module.exports = [
               <div id="soups">
                 <div>Some soup1</div>
                 <div>Some soup2</div>
+                <div></div>
               </div>
               <div id="menus">
                 <div>Menu 1</div>
-                <div>Menu 2</div>
+                <div></div>
                 <div>Menu 3</div>
               </div>
             </body>
           </html>
         `;
+      }
+
+      if (match[1] === 'agent-test') {
+        return 42;
       }
     },
 
@@ -52,6 +57,10 @@ module.exports = [
       return {
         text: data,
       };
+    },
+
+    post: function (match, data) {
+      return 42;
     },
   },
 ];
