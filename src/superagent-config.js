@@ -1,9 +1,9 @@
 module.exports = [
   {
     pattern: 'http://post.endpoint',
-    fixtures: function(match, params, headers) {
+    fixtures: function() {
     },
-    post: function (match, data) {
+    post: function () {
       return {
         code: 201,
       };
@@ -22,7 +22,7 @@ module.exports = [
      * @param params object sent by 'send' function
      * @param headers object set by 'set' function
      */
-    fixtures: function (match, params, headers) {
+    fixtures: function (match) {
       if (match[1] === 'my-restaurant') {
         return `
           <html>
@@ -59,7 +59,7 @@ module.exports = [
       };
     },
 
-    post: function (match, data) {
+    post: function () {
       return 42;
     },
   },

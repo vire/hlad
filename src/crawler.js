@@ -34,10 +34,13 @@ const crawl = () => {
   publicAPI.log('I am crawling');
 
   publicAPI._crawlPromise = new Promise((resolve) => {
-    loadRecipes(publicAPI._recipeFolder)
+
+    loadRecipes(publicAPI._recipeFolder, publicAPI._recipeFile)
       .then(recipes => {
+        console.log('recipes', recipes);
         const requests = recipes
           .map((r, idx) => {
+
             return (function() {
               return new Promise((innerResolve) => {
                 // to not overhaul the target server
@@ -108,7 +111,7 @@ const publish = ({token, channelID, URL}) => {
   return _extract()
     .then(extractResult => {
       publicAPI.log('POST URL: ', URL);
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         request
           .post(URL)
           .query({
@@ -122,19 +125,19 @@ const publish = ({token, channelID, URL}) => {
             resolve({
               res,
               extractResult,
-            })
+            });
           }, (err) => {
             console.error('An error occured during posting:', err);
           });
-      })
+      });
     });
 };
 
-const log = (message) => {
+const log = (...messages) => {
   if(publicAPI._loggingEnabled) {
-    console.log(message);
+    console.log.apply(console, messages);
   }
-}
+};
 
 const publicAPI = {
   _recipeFolder: null,
@@ -143,9 +146,10 @@ const publicAPI = {
   publish,
 };
 
-export default ({recipeFolder, loggingEnabled, reqTimeout = 1000}) => {
+export default ({recipeFolder, recipeFile, loggingEnabled, reqTimeout = 1000}) => {
+  publicAPI._recipeFile = recipeFile;
   publicAPI._recipeFolder = recipeFolder;
   publicAPI._loggingEnabled = loggingEnabled;
-  publicAPI._reqTimeout = reqTimeout
+  publicAPI._reqTimeout = reqTimeout;
   return publicAPI;
 };

@@ -26,3 +26,4 @@ Welcome to HLAD the ultime lunch crawl & publish service.
   }
   ```
 * Run: `npm run crawl -- --URL={slackURL} --token={authToken} --channel={channelID}`
+* Debug: `npm run debug -- --recipe {recipeName}.json` Logs result to console to see if selectors work. *recipeName expects to be located in ./recipes folder*
