@@ -4,6 +4,7 @@ import path from 'path';
 import request from 'superagent';
 import jsdom from 'jsdom';
 import { prettyPrint } from './utils';
+import { standardExtractor, customExtractor } from './extractors';
 import loadRecipes from './recipe-loader';
 var superagentConfig = require('./superagent-config');
 
@@ -47,8 +48,10 @@ const crawl = () => {
                 setTimeout(() => {
                   publicAPI.log('Executing API call!', new Date().toISOString());
                   publicAPI.log('Calling URL: ', JSON.parse(r).url);
+
                   request.get(JSON.parse(r).url)
                     .then(result => innerResolve({
+                      type: JSON.parse(r).type,
                       recipe: r,
                       text: result.text,
                     }), (error) => {
@@ -76,26 +79,8 @@ const _extract = () => {
   return new Promise((resolve) => {
     publicAPI._crawlPromise.then((results) => {
       const _tmp = results.map((res) => {
-        const recipe = JSON.parse(res.response.recipe);
-        const soups = recipe.structure.soups
-          .map(soup => {
-            return res.window.$(soup.locator).text().trim();
-          })
-          .filter(item => item !== '');
-
-        const dishes = recipe.structure.main
-          .map(mainDish => {
-            return res.window.$(mainDish.locator).text().trim();
-          })
-          .filter(item => item !== '');
-
-        return {
-          name: recipe.name,
-          soups,
-          dishes,
-        };
+        return res.response.type === 'custom' ? customExtractor(res) : standardExtractor(res);
       });
-
       publicAPI.log('Crawl Result: ', prettyPrint(_tmp));
       resolve(_tmp);
     });
