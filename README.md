@@ -7,6 +7,7 @@ Welcome to HLAD the ultime lunch crawl & publish service.
   {
     "url": "https://host/path/to/menu/page",
     "name": "A Cozy restaurant",
+    "type": "standard"
     "structure": {
       "soups": [{
         "locator": "#soups > div:nth-child(1)"
@@ -27,3 +28,12 @@ Welcome to HLAD the ultime lunch crawl & publish service.
   ```
 * Run: `npm run crawl -- --URL={slackURL} --token={authToken} --channel={channelID}`
 * Debug: `npm run debug -- --recipe {recipeName}.json` Logs result to console to see if selectors work. *recipeName expects to be located in ./recipes folder*
+
+* If you use a `"type": "custom:a"` extractor, you must import it into the crawler and use it for that special type **a**, otherwise it wont be recognized. The extractor receives the JSDOM object and resturns an object w/
+```
+  return {
+    name: "A Cozy restaurant",
+    soups: [SoupObject,SoupObject, ...],
+    dishes: [DishObject, DishObject, ...],
+  }
+```
