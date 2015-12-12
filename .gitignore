@@ -1,5 +1,7 @@
 node_modules
+dummy
 recipes
 *.log
 *.tar.gz
 *.sh
+.idea
