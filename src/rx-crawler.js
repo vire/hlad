@@ -4,13 +4,7 @@ import fs from 'fs';
 import superagent from 'superagent';
 import cheerio from 'cheerio';
 import customExtractors from './custom-extractors';
-import dotenv from 'dotenv';
 
-dotenv.load();
-
-const URL = process.env.API_URL;
-const token = process.env.API_TOKEN;
-const channelId = process.env.API_CHANEL_ID;
 
 export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
   .flatMap(fileNames => Rx.Observable.fromArray(fileNames))
@@ -59,7 +53,7 @@ export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
   .map(input => {
     const obj = input.lunch;
 
-    const start = `\`\`\`\n[${input.recipe.name}]\n`;
+    const start = `\`\`\`\n[${input.recipe.name}]\n\n`;
 
     const soups = obj.soups
       .filter(s => s !== '')
@@ -79,25 +73,4 @@ export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
 
     return soups || main ? `${start}${soups || main}\`\`\`\n` : '';
   })
-  .reduce((acc, val) => `${acc}${val}`, '')
-  .flatMap(menu => {
-    return new Promise((resolve, reject) => {
-      superagent
-        .post(URL)
-        .query({
-          username: "HLAD-BOT",
-          icon_emoji: ":hamburger:",
-          token: token,
-          channel: channelId,
-          as_user: false,
-          text: menu
-        })
-        .end((err, res) => {
-          if (!err) {
-            resolve({res, menu})
-          } else {
-            reject(err);
-          }
-        });
-    });
-  });
+  .reduce((acc, val) => `${acc}${val}`, '');
