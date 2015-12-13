@@ -1,4 +1,4 @@
-Welcome to HLAD the ultime lunch crawl & publish service.
+Welcome to HLAD the ultimate lunch crawl & publish service.
 
 * Install: `npm install`
 * Use: put json descriptors into /recipes
@@ -7,7 +7,7 @@ Welcome to HLAD the ultime lunch crawl & publish service.
   {
     "url": "https://host/path/to/menu/page",
     "name": "A Cozy restaurant",
-    "type": "standard"
+    "type": "standard",
     "structure": {
       "soups": [{
         "locator": "#soups > div:nth-child(1)"
@@ -26,14 +26,39 @@ Welcome to HLAD the ultime lunch crawl & publish service.
     }
   }
   ```
-* Run: `npm run crawl -- --URL={slackURL} --token={authToken} --channel={channelID}`
-* Debug: `npm run debug -- --recipe {recipeName}.json` Logs result to console to see if selectors work. *recipeName expects to be located in ./recipes folder*
 
-* If you use a `"type": "custom:a"` extractor, you must import it into the crawler and use it for that special type **a**, otherwise it wont be recognized. The extractor receives the JSDOM object and resturns an object w/
-```
-  return {
-    name: "A Cozy restaurant",
-    soups: [SoupObject,SoupObject, ...],
-    dishes: [DishObject, DishObject, ...],
+* Configuration: create an `.env` file with
+    ```bash
+  API_URL=https://<url-to-your-slack>/api/chat.postMessage
+  API_TOKEN=guid-blah-foo-bar
+  API_CHANEL_ID=some-channel-id
+    ```
+* Run: `npm run crawl`
+* Customer extractors: If you need a custom extractor, you need to create a recipe of `type: "custom"` and with an `id: "customRecipeABC"`, then add to the
+    `src/custom-extractors` an extract function under the same *ID* key like following:
+
+```javascript
+customRecipeABC: {
+  extract($) {
+    const elements = $('.css_class_selector').children('p');
+    return {
+      soups: [4, 5]
+        .map(idx => elements.eq(idx).text().substr(2).trim())
+        .filter(t => t !== ''),
+      main: [7, 8, 9]
+        .map(idx => elements.eq(idx).text().substr(2).trim())
+        .filter(t => t !== '')
+    }
   }
+}
+
+```
+
+  * The extract function must return an object with exact two properties:
+
+```javascript
+return {
+  soups: [],
+  main: [],
+}
 ```

@@ -5,3 +5,4 @@ recipes
 *.tar.gz
 *.sh
 .idea
+.env

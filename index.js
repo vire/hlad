@@ -1,16 +1,12 @@
 require('babel/register');
 
-var argv = require('yargs').argv;
-var crawler = require('./src/crawler');
-var folder = __dirname + '/recipes';
+var crawlerSource = require('./src/rx-crawler');
 
-crawler({
-  recipeFolder: folder,
-  loggingEnabled: true,
-})
-  .crawl()
-  .publish({
-    URL: argv.URL,
-    token: argv.token,
-    channelID: argv.channel,
+crawlerSource
+  .subscribe(next => {
+    console.log('received: ', Date.now());
+    // pretty print and post to endpoint
+    console.log('next', next);
+  }, err => {
+    console.log('onError', err);
   });
