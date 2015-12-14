@@ -1,6 +1,6 @@
 require('babel/register');
 var superagent = require('superagent');
-var crawlerSource = require('./src/rx-crawler');
+var crawlerSource = require('./src/crawler');
 var dotenv = require('dotenv').load();
 
 const URL = process.env.API_URL;
