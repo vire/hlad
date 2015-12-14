@@ -8,6 +8,7 @@ const token = process.env.API_TOKEN;
 const channelId = process.env.API_CHANEL_ID;
 
 crawlerSource
+  .reduce((acc, val) => `${acc}${val}`, '')
   .subscribe(menu => {
     superagent
       .post(URL)
