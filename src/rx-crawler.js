@@ -53,7 +53,7 @@ export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
   .map(input => {
     const obj = input.lunch;
 
-    const start = `\`\`\`\n[${input.recipe.name}]\n\n`;
+    const start = `\n*${input.recipe.name}*\n\n`;
 
     const soups = obj.soups
       .filter(s => s !== '')
@@ -68,9 +68,9 @@ export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
       }, '');
 
     if (soups && main) {
-      return `${start}${soups}${main}\`\`\`\n`;
+      return `${start}\`\`\`${soups}${main}\`\`\`\n`;
     }
 
-    return soups || main ? `${start}${soups || main}\`\`\`\n` : '';
+    return soups || main ? `${start}\`\`\`${soups || main}\`\`\`\n` : '';
   })
   .reduce((acc, val) => `${acc}${val}`, '');
