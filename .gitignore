@@ -3,3 +3,5 @@ recipes
 *.log
 *.tar.gz
 *.sh
+.idea
+.env

@@ -1,140 +1,76 @@
+import Rx from 'rx';
 import Promise from 'bluebird';
-import fs from 'fs';
-import path from 'path';
-import request from 'superagent';
-import jsdom from 'jsdom';
-import { prettyPrint } from './utils';
-import { standardExtractor, customExtractor } from './extractors';
-import loadRecipes from './recipe-loader';
-var superagentConfig = require('./superagent-config');
 
-//Before tests
-require('superagent-mock')(request, superagentConfig);
-const jQuery = fs.readFileSync(path.resolve(__dirname + './../node_modules/jquery/dist/jquery.js'), 'utf-8');
+export function createCrawlSource(dependencies) {
+  const { delayTimer, request, ch, fs, extractors} = dependencies;
 
-const _getDOM = (response, jQuery) => {
-  return new Promise((resolve, reject) => {
-    jsdom.env({
-      html: response.text,
-      src: jQuery,
-      done(err, window) {
-        if(err) {
-          reject(err);
-        } else {
-          resolve({
-            response: response,
-            window,
-          });
-        }
-      },
-    });
-  });
-};
+  return Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
+    .flatMap(fileNames => Rx.Observable.fromArray(fileNames))
+    .flatMap(fileName => Rx.Observable.fromNodeCallback(fs.readFile)(`./recipes/${fileName}`, 'utf-8'))
+    .flatMap((val, idx) => {
+      return Rx.Observable.fromPromise(
+        new Promise((resolve, reject) => {
+          const recipe = JSON.parse(val);
 
-const crawl = () => {
-  publicAPI.log('I am crawling');
-
-  publicAPI._crawlPromise = new Promise((resolve) => {
-
-    loadRecipes(publicAPI._recipeFolder, publicAPI._recipeFile)
-      .then(recipes => {
-        console.log('recipes', recipes);
-        const requests = recipes
-          .map((r, idx) => {
-
-            return (function() {
-              return new Promise((innerResolve) => {
-                // to not overhaul the target server
-                setTimeout(() => {
-                  publicAPI.log('Executing API call!', new Date().toISOString());
-                  publicAPI.log('Calling URL: ', JSON.parse(r).url);
-
-                  request.get(JSON.parse(r).url)
-                    .then(result => innerResolve({
-                      type: JSON.parse(r).type,
-                      recipe: r,
-                      text: result.text,
-                    }), (error) => {
-                      publicAPI.log('error', error);
-                    });
-                }, (idx + 1) * publicAPI._reqTimeout);
-              });
-            } ());
-          });
-
-        Promise.all(requests)
-          .then(responses => {
-            const _tmp = responses.map(response => {
-              return _getDOM(response, jQuery);
+          request
+            .get(recipe.url)
+            .end((err, res) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve({
+                  recipe: recipe,
+                  response: res,
+                });
+              }
             });
-            resolve(Promise.all(_tmp));
-          });
-      });
-  });
+        })
+      ).delay((idx + 1) * delayTimer);
+    })
+    .map(payload => {
+      const $ = ch.load(payload.response.text);
+      const lunch = {};
 
-  return publicAPI;
-};
+      if (payload.recipe.type === 'custom' && extractors[payload.recipe.id]) {
+        return {
+          lunch: extractors[payload.recipe.id].extract($),
+          recipe: payload.recipe,
+        };
+      }
 
-const _extract = () => {
-  return new Promise((resolve) => {
-    publicAPI._crawlPromise.then((results) => {
-      const _tmp = results.map((res) => {
-        return res.response.type === 'custom' ? customExtractor(res) : standardExtractor(res);
+      // ['soups', 'main']
+      Object.keys(payload.recipe.structure).forEach(type => {
+        lunch[type] = payload.recipe.structure[type]
+          .map(item => $(item.locator).text().trim())
+          .filter(t => t !== '');
       });
-      publicAPI.log('Crawl Result: ', prettyPrint(_tmp));
-      resolve(_tmp);
+
+      return {
+        lunch,
+        recipe: payload.recipe,
+      };
+    })
+    .map(input => {
+      const obj = input.lunch;
+
+      const start = `\n*${input.recipe.name}*\n\n`;
+
+      const soups = obj.soups
+        .filter(s => s !== '')
+        .reduce((p, c) => {
+          return `${p}Soup: ${c}\n`;
+        }, '');
+
+      const main = obj.main
+        .filter(m => m !== '')
+        .reduce((p, c) => {
+          return `${p}Main: ${c}\n`;
+        }, '');
+
+      if (soups && main) {
+        return `${start}\`\`\`${soups}${main}\`\`\`\n`;
+      }
+
+      return soups || main ? `${start}\`\`\`${soups || main}\`\`\`\n` : '';
     });
-  });
-};
-
-const publish = ({token, channelID, URL}) => {
-
-  if(!token || !channelID) {
-    throw new Error('You must pass token and channelID');
-  }
-
-  return _extract()
-    .then(extractResult => {
-      publicAPI.log('POST URL: ', URL);
-      return new Promise((resolve) => {
-        request
-          .post(URL)
-          .query({
-            token: token,
-            channel: channelID,
-            as_user: false,
-            text: prettyPrint(extractResult),
-          })
-          .end((err, res) => {
-            publicAPI.log('JOB DONE!');
-            resolve({
-              res,
-              extractResult,
-            });
-          }, (err) => {
-            console.error('An error occured during posting:', err);
-          });
-      });
-    });
-};
-
-const log = (...messages) => {
-  if(publicAPI._loggingEnabled) {
-    console.log.apply(console, messages);
-  }
-};
-
-const publicAPI = {
-  _recipeFolder: null,
-  log,
-  crawl,
-  publish,
-};
-
-export default ({recipeFolder, recipeFile, loggingEnabled, reqTimeout = 1000}) => {
-  publicAPI._recipeFile = recipeFile;
-  publicAPI._recipeFolder = recipeFolder;
-  publicAPI._loggingEnabled = loggingEnabled;
-  publicAPI._reqTimeout = reqTimeout;
-  return publicAPI;
-};
+}
