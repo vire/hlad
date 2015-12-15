@@ -9,7 +9,7 @@ var customExtractors = require('./src/custom-extractors');
 const URL = process.env.API_URL;
 const token = process.env.API_TOKEN;
 const channelId = process.env.API_CHANEL_ID;
-console.log('crawlerExports', crawlerExports)
+
 crawlerExports
   .createCrawlSource({
     delayTimer: 500,
@@ -37,6 +37,4 @@ crawlerExports
           console.error('POST failed: ', err);
         }
       });
-  }, err => {
-    console.log('onError', err);
-  });
+  }, err => { console.log('onError', err); });
