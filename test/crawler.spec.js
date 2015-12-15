@@ -1,4 +1,3 @@
-var Rx = require('rx');
 import chai from 'chai';
 import cheerio from 'cheerio';
 
@@ -23,7 +22,7 @@ const firstFakePayload = `
     </div>
   </body>
 </html>
-`
+`;
 
 const contentOfFileA = {
   name: 'Restaurant A',
@@ -31,15 +30,15 @@ const contentOfFileA = {
     soups: [
       {locator: '.soups div:nth-child(1)'},
       {locator: '.soups div:nth-child(2)'},
-      {locator: '.soups div:nth-child(3)'}
+      {locator: '.soups div:nth-child(3)'},
     ],
     main: [
       {locator: '.main div:nth-child(1)'},
       {locator: '.main div:nth-child(2)'},
-      {locator: '.main div:nth-child(3)'}
-    ]
+      {locator: '.main div:nth-child(3)'},
+    ],
   },
-  url: 'http://localhost:3000/a'
+  url: 'http://localhost:3000/a',
 };
 
 const contentOfFileB = {
@@ -48,15 +47,15 @@ const contentOfFileB = {
     soups: [
       {locator: '.soups div:nth-child(1)'},
       {locator: '.soups div:nth-child(2)'},
-      {locator: '.soups div:nth-child(3)'}
+      {locator: '.soups div:nth-child(3)'},
     ],
     main: [
       {locator: '.main div:nth-child(1)'},
       {locator: '.main div:nth-child(2)'},
-      {locator: '.main div:nth-child(3)'}
-    ]
+      {locator: '.main div:nth-child(3)'},
+    ],
   },
-  url: 'http://localhost:3000/b'
+  url: 'http://localhost:3000/b',
 };
 
 const contentOfFileC = {
@@ -67,15 +66,15 @@ const contentOfFileC = {
     soups: [
       {locator: '.soups div:nth-child(1)'},
       {locator: '.soups div:nth-child(2)'},
-      {locator: '.soups div:nth-child(3)'}
+      {locator: '.soups div:nth-child(3)'},
     ],
     main: [
       {locator: '.main div:nth-child(1)'},
       {locator: '.main div:nth-child(2)'},
-      {locator: '.main div:nth-child(3)'}
-    ]
+      {locator: '.main div:nth-child(3)'},
+    ],
   },
-  url: 'http://localhost:3000/c'
+  url: 'http://localhost:3000/c',
 };
 
 
@@ -89,25 +88,25 @@ describe('Crawler', () => {
             main: [0, 1, 2]
               .map(idx => $('.main').children('div').eq(idx).text().trim()),
             soups: [0, 1, 2]
-              .map(idx => $('.soups').children('div').eq(idx).text().trim())
-          }
-        }
-      }
+              .map(idx => $('.soups').children('div').eq(idx).text().trim()),
+          };
+        },
+      },
     },
     request: {
-      get(url) {
+      get() {
         let result;
 
         result = {
-          text: firstFakePayload
+          text: firstFakePayload,
         };
 
         return {
           end(fn) {
             fn(null, result);
-          }
-        }
-      }
+          },
+        };
+      },
     },
     ch: cheerio,
     fs: {

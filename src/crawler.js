@@ -5,7 +5,7 @@ import superagent from 'superagent';
 import cheerio from 'cheerio';
 import customExtractors from './custom-extractors';
 
-export const createCrawlSource = (dependencies) => {
+export function createCrawlSource(dependencies) {
   const { delayTimer, request, ch, fs, extractors} = dependencies;
 
   return Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
@@ -24,12 +24,12 @@ export const createCrawlSource = (dependencies) => {
               } else {
                 resolve({
                   recipe: recipe,
-                  response: res
+                  response: res,
                 });
               }
             });
         })
-      ).delay((idx + 1) * delayTimer)
+      ).delay((idx + 1) * delayTimer);
     })
     .map(payload => {
       const $ = ch.load(payload.response.text);
@@ -38,8 +38,8 @@ export const createCrawlSource = (dependencies) => {
       if (payload.recipe.type === 'custom' && extractors[payload.recipe.id]) {
         return {
           lunch: extractors[payload.recipe.id].extract($),
-          recipe: payload.recipe
-        }
+          recipe: payload.recipe,
+        };
       }
 
       // ['soups', 'main']
@@ -51,7 +51,7 @@ export const createCrawlSource = (dependencies) => {
 
       return {
         lunch,
-        recipe: payload.recipe
+        recipe: payload.recipe,
       };
     })
     .map(input => {
@@ -79,7 +79,7 @@ export const createCrawlSource = (dependencies) => {
     });
 };
 
-export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
+export const crawler = Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
   .flatMap(fileNames => Rx.Observable.fromArray(fileNames))
   .flatMap(fileName => Rx.Observable.fromNodeCallback(fs.readFile)(`./recipes/${fileName}`, 'utf-8'))
   .flatMap((val, idx) => {
@@ -95,12 +95,12 @@ export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
             } else {
               resolve({
                 recipe: recipe,
-                response: res
+                response: res,
               });
             }
           });
       })
-    ).delay((idx + 1) * 500)
+    ).delay((idx + 1) * 500);
   })
   .map(payload => {
     const $ = cheerio.load(payload.response.text);
@@ -108,8 +108,8 @@ export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
 
     if (payload.recipe.type === 'custom' && customExtractors[payload.recipe.id]) {
       return Object.assign(payload, {
-        lunch: customExtractors[payload.recipe.id].extract($)
-      })
+        lunch: customExtractors[payload.recipe.id].extract($),
+      });
     }
 
     // ['soups', 'main']
@@ -120,7 +120,7 @@ export default Rx.Observable.fromNodeCallback(fs.readdir)('./recipes')
     });
 
     return Object.assign(payload, {
-      lunch
+      lunch,
     });
   })
   .map(input => {

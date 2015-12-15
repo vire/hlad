@@ -1,13 +1,23 @@
 require('babel/register');
+require('dotenv').load();
+var cheerio = require('cheerio');
 var superagent = require('superagent');
-var crawlerSource = require('./src/crawler');
-var dotenv = require('dotenv').load();
+var fs = require('fs');
+var crawlerExports = require('./src/crawler');
+var customExtractors = require('./src/custom-extractors');
 
 const URL = process.env.API_URL;
 const token = process.env.API_TOKEN;
 const channelId = process.env.API_CHANEL_ID;
-
-crawlerSource
+console.log('crawlerExports', crawlerExports)
+crawlerExports
+  .createCrawlSource({
+    delayTimer: 500,
+    ch: cheerio,
+    fs: fs,
+    request: superagent,
+    extractors: customExtractors,
+  })
   .reduce((acc, val) => `${acc}${val}`, '')
   .subscribe(menu => {
     superagent
@@ -18,13 +28,13 @@ crawlerSource
         token: token,
         channel: channelId,
         as_user: false,
-        text: menu
+        text: menu,
       })
-      .end((err, res) => {
+      .end((err) => {
         if (!err) {
-          console.log('POST ok!')
+          console.log('POST ok!');
         } else {
-          console.error('POST failed: ', err)
+          console.error('POST failed: ', err);
         }
       });
   }, err => {
