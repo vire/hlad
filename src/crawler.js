@@ -51,26 +51,36 @@ export function createCrawlSource(dependencies) {
       };
     })
     .map(input => {
+      const containsBurger = str => str.toLowerCase().indexOf('burger') !== -1;
+
       const obj = input.lunch;
 
       const start = `\n*${input.recipe.name}*\n\n`;
 
       const soups = obj.soups
         .filter(s => s !== '')
+        .map(item => {
+          return `> :stew: ${item}`;
+        })
         .reduce((p, c) => {
-          return `${p}Soup: ${c}\n`;
+          return `${p}${c}\n`;
         }, '');
 
       const main = obj.main
         .filter(m => m !== '')
+        .map(item => {
+          const icon = (containsBurger(input.recipe.name) || containsBurger(item)) ? ':hamburger:' : ':poultry_leg:';
+
+          return `> ${icon} ${item}`;
+        })
         .reduce((p, c) => {
-          return `${p}Main: ${c}\n`;
+          return `${p}${c}\n`;
         }, '');
 
       if (soups && main) {
-        return `${start}\`\`\`${soups}${main}\`\`\`\n`;
+        return `${start}${soups}${main}\n`;
       }
 
-      return soups || main ? `${start}\`\`\`${soups || main}\`\`\`\n` : '';
+      return soups || main ? `${start}${soups || main}\n` : '';
     });
 }
