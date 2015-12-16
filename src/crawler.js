@@ -58,19 +58,19 @@ export function createCrawlSource(dependencies) {
       const soups = obj.soups
         .filter(s => s !== '')
         .reduce((p, c) => {
-          return `${p}Soup: ${c}\n`;
+          return `${p}> :stew: ${c}\n`;
         }, '');
 
       const main = obj.main
         .filter(m => m !== '')
         .reduce((p, c) => {
-          return `${p}Main: ${c}\n`;
+          return `${p}> :hamburger: ${c}\n`;
         }, '');
 
       if (soups && main) {
-        return `${start}\`\`\`${soups}${main}\`\`\`\n`;
+        return `${start}${soups}${main}\n`;
       }
 
-      return soups || main ? `${start}\`\`\`${soups || main}\`\`\`\n` : '';
+      return soups || main ? `${start}${soups || main}\n` : '';
     });
 }
