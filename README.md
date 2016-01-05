@@ -1,4 +1,4 @@
-Welcome to HLAD the ultimate lunch crawl & publish service.
+# Welcome to HLAD - the ultimate lunch "crawl & publish" tool.
 
 * Install: `npm install`
 * Use: put json descriptors into /recipes
@@ -62,3 +62,13 @@ return {
   main: [],
 }
 ```
+
+---
+
+### Usage with docker
+
+  * requires .env with proper variables (endpoint, token, channelID), recipes (+ custom-extractors.js if needed)
+
+  `docker build -t <some-container-name> .` <-- don't forget the dot!
+
+  `docker run -it -w /src <some-container-name> npm run crawl`
