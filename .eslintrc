@@ -1,34 +1,32 @@
 {
-    "rules": {
-        "indent": [
-            2,
-            2
-        ],
-        "quotes": [
-            2,
-            "single"
-        ],
-        "linebreak-style": [
-            2,
-            "unix"
-        ],
-        "semi": [
-            2,
-            "always"
-        ],
-        "no-console" : [
-          0
-        ],
-        "comma-dangle": [2, "always-multiline"],
-        "wrap-iife": [2, "outside"]
-    },
-    "env": {
-        "mocha":true,
-        "es6": true,
-        "node": true
-    },
-    "ecmaFeatures": {
-        "modules": true
-    },
-    "extends": "eslint:recommended"
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "indent": [
+      "error",
+      2
+    ],
+    "comma-dangle": [
+      "error",
+      "always-multiline"
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ]
+  }
 }
