@@ -1,67 +1,26 @@
-# Welcome to HLAD - the ultimate lunch "crawl & publish" tool.
+# HLAD - agent and job executor
 
-* Install: `npm install`
-* Use: put json descriptors into /recipes
-
-  ```javscript
-  {
-    "url": "https://host/path/to/menu/page",
-    "name": "A Cozy restaurant",
-    "type": "standard",
-    "structure": {
-      "soups": [{
-        "locator": "#soups > div:nth-child(1)"
-      }, {
-        "locator": "#soups > div:nth-child(2)"
-      }],
-      "main": [{
-        "locator": "#menus > div:nth-child(1)"
-      }, {
-        "locator": "#menus > div:nth-child(2)"
-      }, {
-        "locator": "#menus > div:nth-child(3)"
-      }, {
-        "locator": "#menus > div:nth-child(4)"
-      }]
-    }
-  }
-  ```
-
+* Installation: `git clone <this-repository` cd to the folder and run `npm install`
 * Configuration: create an `.env` file with
+
+
     ```bash
-  API_URL=https://<url-to-your-slack>/api/chat.postMessage
-  API_TOKEN=guid-blah-foo-bar
-  API_CHANEL_ID=some-channel-id
+    API_URL=https://<url-to-your-slack>/api/chat.postMessage
+    API_TOKEN=guid-blah-foo-bar
+    API_CHANEL_ID=some-channel-id
     ```
-* Run: `npm run crawl`
-* Customer extractors: If you need a custom extractor, you need to create a recipe of `type: "custom"` and with an `id: "customRecipeABC"`, then add to the
-    `src/custom-extractors` an extract function under the same *ID* key like following:
 
-```javascript
-customRecipeABC: {
-  extract($) {
-    const elements = $('.css_class_selector').children('p');
-    return {
-      soups: [4, 5]
-        .map(idx => elements.eq(idx).text().substr(2).trim())
-        .filter(t => t !== ''),
-      main: [7, 8, 9]
-        .map(idx => elements.eq(idx).text().substr(2).trim())
-        .filter(t => t !== '')
-    }
-  }
-}
+* How it works
+  First you need to have an empty firebase instance. If you don't have please register one it takes 1 minute. (TODO add links for `how to`)
+  Put you private firebase ID into .env file under the key `FIREBASE_ID=<your-firebase-id>` !!!NOTICE: Do not commit .env
 
-```
 
-  * The extract function must return an object with exact two properties:
+* Run: `npm start` this will start an agent listening on commands from firebase
+  > If you wanna execute a crawl job you need to have some recipes in firebase and valid configuration for publishing them
 
-```javascript
-return {
-  soups: [],
-  main: [],
-}
-```
+  * to trigger an job just PUT something via REST API to your firebase to key `crawl_jobs` like
+
+  `curl -X PUT -d '{ "execute" : true }' https://<your-firebase-id>.firebaseio.com/crawl_jobs.json`
 
 ---
 
@@ -71,4 +30,4 @@ return {
 
   `docker build -t <some-container-name> .` <-- don't forget the dot!
 
-  `docker run -it -w /src <some-container-name> npm run crawl`
+  `docker run -it -w /src <some-container-name> npm start`

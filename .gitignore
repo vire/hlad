@@ -1,5 +1,8 @@
 node_modules
 recipes
+tmp
+typings
+dist
 *.log
 *.tar.gz
 *.sh

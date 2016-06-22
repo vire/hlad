@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "chai": "registry:npm/chai#3.5.0+20160415060238",
+    "debug": "registry:npm/debug#2.0.0+20160511151334",
+    "sinon": "registry:npm/sinon#1.16.0+20160427193336"
+  },
+  "globalDependencies": {
+    "cheerio": "registry:dt/cheerio#0.17.0+20160407085313",
+    "dotenv": "registry:dt/dotenv#2.0.0+20160327131627",
+    "firebase": "registry:dt/firebase#2.4.1+20160412125105",
+    "isomorphic-fetch": "registry:dt/isomorphic-fetch#0.0.0+20160524142046",
+    "mocha": "registry:dt/mocha#2.2.5+20160317120654",
+    "node": "registry:dt/node#6.0.0+20160613154055"
+  }
+}
