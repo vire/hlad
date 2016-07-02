@@ -22,19 +22,27 @@ type LunchRecipe = {
 export const lunchToString = ({recipe, lunch}: LunchRecipe):string => {
   const start = `\n*${recipe.name}*\n\n`;
 
-  const soups = lunch.soups
-    .filter(s => s !== '')
-    .map(item => `> :stew: ${item}`)
-    .reduce((p, c) => `${p}${c}\n`, '');
+  let soups;
+  let main;
 
-  const main = lunch.main
-    .filter(m => m !== '')
-    .map(item => {
-      const icon = (containsBurger(recipe.name) || containsBurger(item)) ? ':hamburger:' : ':poultry_leg:';
+  if (lunch.soups) {
+    soups = lunch.soups
+      .filter(s => s !== '')
+      .map(item => `> :stew: ${item}`)
+      .reduce((p, c) => `${p}${c}\n`, '');
+  }
 
-      return `> ${icon} ${item}`;
-    })
-    .reduce((p, c) => `${p}${c}\n`, '');
+  if (lunch.main) {
+    main = lunch.main
+      .filter(m => m !== '')
+      .map(item => {
+        const icon = (containsBurger(recipe.name) || containsBurger(item)) ? ':hamburger:' : ':poultry_leg:';
+
+        return `> ${icon} ${item}`;
+      })
+      .reduce((p, c) => `${p}${c}\n`, '');
+
+  }
 
   dbg(`soups: ${soups}`);
   dbg(`main: ${main}`);

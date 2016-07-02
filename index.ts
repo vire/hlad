@@ -40,7 +40,7 @@ const recipeSource$ = Observable.create(observer => {
     }, recipesError => observer.error(recipesError));
 });
 
-// call URL from recipe, and parse HTMLText resplonse with recipe definition and remove crawlJob
+// call URL from recipe, and parse HTMLText response with recipe definition and remove crawlJob
 // publish to endpoint based on `ENDPOINT_SETTINGS`
 const crawlJobsSource$ = agentSource$
   .filter(val => val.payload && val.type === FirebaseEvent.RECEIVED_CRAWL_JOBS)

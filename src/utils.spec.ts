@@ -115,25 +115,61 @@ describe('Utils', () => {
     });
   });
 
-  it('`lunchToString` turns an object into a publishable string', () => {
-    const recipeWithLunch = {
-      recipe: {
-        name: 'MyTest',
-        selectors: {}
-      },
-      lunch: {
-        main: [
-          'Spaghetti bolognese',
-          'big kahuna burger'
-        ],
-        soups: [
-          'Gazpacho'
-        ],
-      }
-    };
-    const str = '\n*MyTest*\n\n> :stew: Gazpacho' +
-      '\n> :poultry_leg: Spaghetti bolognese' +
-      '\n> :hamburger: big kahuna burger\n\n';
-    expect(lunchToString(recipeWithLunch)).to.equal(str)
-  })
+  describe.only('lunchToString', () => {
+    it('main + soup', () => {
+      const recipeWithLunch = {
+        recipe: {
+          name: 'MyTest',
+          selectors: {}
+        },
+        lunch: {
+          main: [
+            'Spaghetti bolognese',
+            'big kahuna burger'
+          ],
+          soups: [
+            'Gazpacho'
+          ],
+        }
+      };
+      const str = '\n*MyTest*\n\n> :stew: Gazpacho' +
+        '\n> :poultry_leg: Spaghetti bolognese' +
+        '\n> :hamburger: big kahuna burger\n\n';
+      expect(lunchToString(recipeWithLunch)).to.equal(str)
+    });
+
+    it('soup only', () => {
+      const recipeWithLunch = {
+        recipe: {
+          name: 'MyTest',
+          selectors: {}
+        },
+        lunch: {
+          soups: [
+            'Gazpacho'
+          ],
+        }
+      };
+      const str = '\n*MyTest*\n\n> :stew: Gazpacho\n\n';
+      expect(lunchToString(recipeWithLunch)).to.equal(str)
+    });
+
+    it('main only', () => {
+      const recipeWithLunch = {
+        recipe: {
+          name: 'MyTest',
+          selectors: {}
+        },
+        lunch: {
+          main: [
+            'Spaghetti bolognese',
+            'big kahuna burger'
+          ],
+        }
+      };
+      const str = '\n*MyTest*\n\n> :poultry_leg: Spaghetti bolognese' +
+        '\n> :hamburger: big kahuna burger\n\n';
+      expect(lunchToString(recipeWithLunch)).to.equal(str)
+    });
+  });
 });
