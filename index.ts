@@ -73,7 +73,7 @@ const testJobsSource$ = agentSource$
       .child(`${TEST_RESULTS}`)
       .push()
       .set({
-        pendingTestID: result.recipe.pendingTestID,
+        pendingTestResultKey: result.recipe.firebaseKey,
         result: result.lunch,
       }, (resultsErr) => {
         if (resultsErr) {

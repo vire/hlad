@@ -38,7 +38,7 @@ export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<an
             .child(TEST_JOBS)
             .on('value', testJobsSnapshot => {
               const payload = testJobsSnapshot.val();
-              dbg(`Firebase - test_job ${JSON.stringify(payload, null, 2)}`);
+              dbg(`Firebase - test_job ${JSON.stringify(payload)}`);
               observer.next({
                 type: FirebaseEvent.RECEIVED_TEST_JOBS,
                 payload
