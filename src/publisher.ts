@@ -13,6 +13,8 @@ type settings = {
 export type publish = (settings: settings, lunchString: string) => Observable<any>
 
 export const publish = ({URL, token, channel}, lunchString) => {
+  dbg(`lunchString: ${lunchString}`);
+
   const queryParams = querystring.stringify({
     username: 'HLAD-BOT',
     icon_emoji: ':hamburger:',

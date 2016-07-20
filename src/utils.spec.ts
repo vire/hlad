@@ -115,7 +115,7 @@ describe('Utils', () => {
     });
   });
 
-  describe.only('lunchToString', () => {
+  describe('lunchToString', () => {
     it('main + soup', () => {
       const recipeWithLunch = {
         recipe: {

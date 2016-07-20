@@ -45,17 +45,11 @@ const recipeSource$ = Observable.create(observer => {
 const crawlJobsSource$ = agentSource$
   .filter(val => val.payload && val.type === FirebaseEvent.RECEIVED_CRAWL_JOBS)
   .do(val => dbg(`crawlJobsSource$ value: ${JSON.stringify(val)}`))
-  .switchMap(crawlJob => {
-    return recipeSource$
-      .flatMap(recipesHash => crawler(recipesHash, 200)) // once new job arrives
-      .map(lunch => lunchToString(lunch))
-      .scan((acc, val) => `${acc}${val}`, '')
-      .do(lunchString => {
-        dbg(`lunchString: ${lunchString}`);
-        return publish(ENDPOINT_SETTINGS, lunchString)
-      })
-  })
-  .do(() => {
+  .switchMap(
+    crawlJob => recipeSource$.flatMap(recipesHash => crawler(recipesHash, 200)) // once new job arrives
+  )
+  .do(lunchString => {
+    publish(ENDPOINT_SETTINGS, lunchString);
     dbg(`Removing finished crawlJ ${CRAWL_JOBS}`);
     firebaseRef
       .child(CRAWL_JOBS)
@@ -67,7 +61,7 @@ const crawlJobsSource$ = agentSource$
 const testJobsSource$ = agentSource$
   .filter(val => val.payload && val.type === FirebaseEvent.RECEIVED_TEST_JOBS)
   .flatMap(({ payload }) => crawler(payload, 0))
-  .do(result => {
+  .do((result: any) => {
     dbg(`Test result: ${JSON.stringify(result)}`);
     firebaseRef
       .child(`${TEST_RESULTS}`)
