@@ -25,9 +25,9 @@ describe('Utils', () => {
       return new Promise((res, rej) => {
         res({
           text() {
-            return text
+            return text;
           }
-        })
+        });
       });
     };
 
@@ -135,7 +135,7 @@ describe('Utils', () => {
       const str = '\n*MyTest*\n\n> :stew: Gazpacho' +
         '\n> :poultry_leg: Spaghetti bolognese' +
         '\n> :hamburger: big kahuna burger\n\n';
-      expect(lunchToString(recipeWithLunch)).to.equal(str)
+      expect(lunchToString(recipeWithLunch)).to.equal(str);
     });
 
     it('soup only', () => {
@@ -151,7 +151,7 @@ describe('Utils', () => {
         }
       };
       const str = '\n*MyTest*\n\n> :stew: Gazpacho\n\n';
-      expect(lunchToString(recipeWithLunch)).to.equal(str)
+      expect(lunchToString(recipeWithLunch)).to.equal(str);
     });
 
     it('main only', () => {
@@ -169,7 +169,7 @@ describe('Utils', () => {
       };
       const str = '\n*MyTest*\n\n> :poultry_leg: Spaghetti bolognese' +
         '\n> :hamburger: big kahuna burger\n\n';
-      expect(lunchToString(recipeWithLunch)).to.equal(str)
+      expect(lunchToString(recipeWithLunch)).to.equal(str);
     });
   });
 });

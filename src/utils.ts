@@ -19,7 +19,7 @@ type LunchRecipe = {
   lunch: Lunch;
 }
 
-export const lunchToString = ({recipe, lunch}: LunchRecipe):string => {
+export const lunchToString = ({recipe, lunch}: LunchRecipe): string => {
   const start = `\n*${recipe.name}*\n\n`;
 
   let soups;
@@ -60,7 +60,7 @@ export const HTMLToLunch = (HTMLString, recipe): CrawledRecipe => {
 
   if (!recipe.structure) {
     debug('Recipe has no "structure"');
-    return { lunch, recipe }
+    return { lunch, recipe };
   }
 
   Object.keys(recipe.structure).forEach(type => {
@@ -76,7 +76,7 @@ export const HTMLToLunch = (HTMLString, recipe): CrawledRecipe => {
 export const getHTMLText = (URL) => fetch(URL).then(resp => resp.text());
 
 interface FirebaseHash {
-  [key:string]: any; // Hash with key as firebase node name `recipes`, and value the recipe itself
+  [key: string]: any; // Hash with key as firebase node name `recipes`, and value the recipe itself
 }
 
 

@@ -1,4 +1,5 @@
 import { Observable } from '@reactivex/rxjs';
+
 import { getHTMLText, HTMLToLunch, objectWithKeysToArray, lunchToString } from './utils';
 import * as debug from 'debug';
 const dbg = debug('hlad-crawler');
@@ -16,11 +17,11 @@ export const crawler: crawler = (recipesHash, requestDelay) => {
       if (requestDelay) {
         return reqSource$
           .delay((idx + 1) * requestDelay)
-          .map((HTMLString) => HTMLToLunch(HTMLString, recipe))
+          .map((HTMLString) => HTMLToLunch(HTMLString, recipe));
       }
 
       return reqSource$.map(str => HTMLToLunch(str, recipe));
     })
     .map(lunch => lunchToString(lunch))
-    .reduce((acc, val) => `${acc}${val}`, '')
+    .reduce((acc, val) => `${acc}${val}`, '');
 };

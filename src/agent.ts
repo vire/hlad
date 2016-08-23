@@ -11,16 +11,13 @@ const dbg = debug(`hlad-${AGENT_KEY}`);
 const CRAWL_JOBS = 'crawl_jobs';
 const TEST_JOBS = 'test_jobs';
 
-
 export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<any> {
   return Observable.create(observer => {
     dbg('starting agent');
 
     firebaseRef
       .child(AGENT_KEY)
-      .set({
-        active: true
-      }, (updateError) => {
+      .set({ active: true }, updateError => {
         if (!updateError) {
           firebaseRef
             .child(CRAWL_JOBS)
@@ -29,10 +26,8 @@ export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<an
               observer.next({
                 type: FirebaseEvent.RECEIVED_CRAWL_JOBS,
                 payload,
-              })
-            }, crawlJobsErr => {
-              observer.error(crawlJobsErr)
-            });
+              });
+            }, crawlJobsErr => observer.error(crawlJobsErr));
 
           firebaseRef
             .child(TEST_JOBS)
@@ -42,10 +37,10 @@ export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<an
               observer.next({
                 type: FirebaseEvent.RECEIVED_TEST_JOBS,
                 payload
-              })
-            }, testJobsErr => {
-              observer.error(testJobsErr)
-            });
+              });
+            }, testJobsErr => observer.error(testJobsErr));
+        } else {
+          dbg('could not start agent: ', updateError);
         }
       });
 
@@ -53,9 +48,7 @@ export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<an
       dbg('stopping agent');
       firebaseRef
         .child(AGENT_KEY)
-        .set({
-          active: false,
-        }, () => {});
-    }
+        .set({ active: false }, () => {});
+    };
   });
 }

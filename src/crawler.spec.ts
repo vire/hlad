@@ -13,9 +13,9 @@ describe('crawler', () => {
       return new Promise((res, rej) => {
         res({
           text() {
-            return HTMLText
+            return HTMLText;
           }
-        })
+        });
       });
     };
 
@@ -63,5 +63,5 @@ describe('crawler', () => {
     });
 
     scheduler.flush();
-  })
+  });
 });
