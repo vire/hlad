@@ -48,8 +48,8 @@ const crawlJobsSource$ = agentSource$
   .switchMap(
     crawlJob => recipeSource$.flatMap(recipesHash => crawler(recipesHash, 200)) // once new job arrives
   )
-  .do(lunchString => {
-    publish(ENDPOINT_SETTINGS, lunchString);
+  .do((payload: any) => {
+    publish(ENDPOINT_SETTINGS, payload.lunchString);
     dbg(`Removing finished crawlJ ${CRAWL_JOBS}`);
     firebaseRef
       .child(CRAWL_JOBS)
@@ -62,20 +62,27 @@ const testJobsSource$ = agentSource$
   .filter(val => val.payload && val.type === FirebaseEvent.RECEIVED_TEST_JOBS)
   .flatMap(({ payload }) => crawler(payload, 0))
   .do((result: any) => {
-    dbg(`Test result: ${JSON.stringify(result)}`);
+    const firebaseKey = Object.keys(result.recipe)[0];
+
+    if (!firebaseKey) {
+      console.error('Missing or Invalid firebase key!');
+      return;
+    }
+
+    dbg(`firebaseKey ${firebaseKey}`);
     firebaseRef
       .child(`${TEST_RESULTS}`)
       .push()
       .set({
-        pendingTestResultKey: result.recipe.firebaseKey,
-        result: result.lunch,
+        pendingTestResultKey: firebaseKey,
+        result: result.lunchString,
       }, (resultsErr) => {
         if (resultsErr) {
           dbg(`${TEST_RESULTS} error: ${resultsErr}`);
         } else {
-          dbg(`Removing test ${result.recipe.firebaseKey}`);
+          dbg(`Removing test ${firebaseKey}`);
           firebaseRef
-            .child(`${TEST_JOBS}/${result.recipe.firebaseKey}`)
+            .child(`${TEST_JOBS}/${firebaseKey}`)
             .remove();
         }
       });
