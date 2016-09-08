@@ -36,7 +36,7 @@ const recipeSource$ = Observable.create(observer => {
     .child(RECIPES)
     .on('value', recipesSnapshot => {
       const payload = recipesSnapshot.val();
-      observer.next(payload)
+      observer.next(payload);
     }, recipesError => observer.error(recipesError));
 });
 

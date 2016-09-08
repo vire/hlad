@@ -3,8 +3,8 @@
   "version": "0.2.0",
   "description": "Hlad crawler is a small utility to crawl webpages for lunch menus and post them to an REST endpoint.",
   "engines": {
-    "node": ">=6.0.0",
-    "npm": "^3.0.0"
+    "node": "6.3.1",
+    "npm": "3.10.3"
   },
   "scripts": {
     "agent": "ts-node index.ts",
