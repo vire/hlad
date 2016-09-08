@@ -6,7 +6,6 @@ import * as debug from 'debug';
 import { createAgent, FirebaseEvent } from './src/agent';
 import { crawler } from './src/crawler';
 import { publish } from './src/publisher';
-import { lunchToString } from './src/utils';
 
 if (process.env.NODE_ENV !== 'production') {
   config();

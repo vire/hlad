@@ -1,5 +1,5 @@
 interface FirebaseMock {
-  child(string): any;
+  child(str: string): any;
   set(val, cb): void;
   on(event, dataCb, errCb): void;
 }
