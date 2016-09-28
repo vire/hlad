@@ -1,11 +1,6 @@
 node_modules
-
-# Typescript
 tmp
+typings
 dist
-
-# Common
 *.log
-*.sh
 .idea
-.env

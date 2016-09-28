@@ -25,7 +25,8 @@ const ENDPOINT_SETTINGS = {
   channel: process.env.API_CHANEL_ID,
 };
 
-dbg(`Publish settings: ${JSON.stringify(ENDPOINT_SETTINGS)}`);
+// don't log tokens and channels
+dbg(`Publish endpoint: ${JSON.stringify(process.env.API_UR)}`);
 
 const agentSource$ = createAgent(firebaseRef).share();
 
