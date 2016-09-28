@@ -36,7 +36,9 @@ export const lunchToString = ({recipe, lunch}: LunchRecipe): string => {
     main = lunch.main
       .filter(m => m !== '')
       .map(item => {
-        const icon = (containsBurger(recipe.name) || containsBurger(item)) ? ':hamburger:' : ':poultry_leg:';
+        const icon = (containsBurger(recipe.name) || containsBurger(item))
+          ? ':hamburger:'
+          : ':poultry_leg:';
 
         return `> ${icon} ${item}`;
       })
@@ -76,7 +78,10 @@ export const HTMLToLunch = (HTMLString, recipe): CrawledRecipe => {
 export const getHTMLText = (URL) => fetch(URL).then(resp => resp.text());
 
 interface FirebaseHash {
-  [key: string]: any; // Hash with key as firebase node name `recipes`, and value the recipe itself
+  /*
+   Hash with key as firebase node name `recipes`, and value the recipe itself
+   */
+  [key: string]: any;
 }
 
 

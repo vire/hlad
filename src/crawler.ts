@@ -1,10 +1,12 @@
 import { Observable } from '@reactivex/rxjs';
+import * as debug from 'debug';
 
 import { getHTMLText, HTMLToLunch, objectWithKeysToArray, lunchToString } from './utils';
-import * as debug from 'debug';
+
 const dbg = debug('hlad-crawler');
 
-export type crawler = (recipeHash: any, requestDelay: number) => Observable<{lunchString: string, recipe: any}>;
+export type crawler = (recipeHash: any, requestDelay: number) =>
+  Observable<{lunchString: string, recipe: any}>;
 
 export const crawler: crawler = (recipesHash, requestDelay) => {
   dbg(`got recipeHash ${JSON.stringify(recipesHash)}`);

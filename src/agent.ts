@@ -15,10 +15,13 @@ export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<an
   return Observable.create(observer => {
     dbg('starting agent');
 
+    // as first thing, we notify Firebase, about agent being ready.
     firebaseRef
       .child(AGENT_KEY)
       .set({ active: true }, updateError => {
         if (!updateError) {
+
+          // notify observer when a CRAWL_JOB event arrives to Firebase
           firebaseRef
             .child(CRAWL_JOBS)
             .on('value', crawJobsSnapshot => {
@@ -29,21 +32,25 @@ export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<an
               });
             }, crawlJobsErr => observer.error(crawlJobsErr));
 
+          // notify observer when a TEST_JOB event occurs
           firebaseRef
             .child(TEST_JOBS)
-            .on('value', testJobsSnapshot => {
-              const payload = testJobsSnapshot.val();
-              dbg(`Firebase - test_job ${JSON.stringify(payload)}`);
-              observer.next({
-                type: FirebaseEvent.RECEIVED_TEST_JOBS,
-                payload
-              });
-            }, testJobsErr => observer.error(testJobsErr));
+            .on('value',
+              testJobsSnapshot => {
+                const payload = testJobsSnapshot.val();
+                dbg(`Firebase - test_job ${JSON.stringify(payload)}`);
+                observer.next({
+                  type: FirebaseEvent.RECEIVED_TEST_JOBS,
+                  payload
+                });
+              },
+              testJobsErr => observer.error(testJobsErr));
         } else {
           dbg('could not start agent: ', updateError);
         }
       });
 
+    // Gracefully shutdown agent + set his presence on Firebase as inactive
     return () => {
       dbg('stopping agent');
       firebaseRef

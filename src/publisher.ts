@@ -15,8 +15,9 @@ export type publish = (settings: settings, lunchString: string) => Observable<an
 export const publish = ({URL, token, channel}, lunchString) => {
   dbg(`lunchString: ${lunchString}`);
 
+  // slack specific
   const queryParams = querystring.stringify({
-    username: 'HLAD-BOT',
+    username: 'HLAD-BOT', // TODO can be configurable
     icon_emoji: ':hamburger:',
     token: token,
     channel: channel,

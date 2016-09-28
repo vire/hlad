@@ -43,10 +43,11 @@ const recipeSource$ = Observable.create(observer => {
 // call URL from recipe, and parse HTMLText response with recipe definition and remove crawlJob
 // publish to endpoint based on `ENDPOINT_SETTINGS`
 const crawlJobsSource$ = agentSource$
-  .filter(val => val.payload && val.type === FirebaseEvent.RECEIVED_CRAWL_JOBS)
+  .filter(({ payload, type }) => payload && type === FirebaseEvent.RECEIVED_CRAWL_JOBS)
   .do(val => dbg(`crawlJobsSource$ value: ${JSON.stringify(val)}`))
   .switchMap(
-    crawlJob => recipeSource$.flatMap(recipesHash => crawler(recipesHash, 200)) // once new job arrives
+    // once new job arrives
+    crawlJob => recipeSource$.flatMap(recipesHash => crawler(recipesHash, 200))
   )
   .do((payload: any) => {
     publish(ENDPOINT_SETTINGS, payload.lunchString);
@@ -88,12 +89,10 @@ const testJobsSource$ = agentSource$
       });
   });
 
-const subscription = Observable.merge(
-  crawlJobsSource$,
-  testJobsSource$
-).filter((val: any) => val.payload).subscribe(
-  val => console.log(`received val: ${JSON.stringify(val)}`)
-);
+const subscription = Observable.merge(crawlJobsSource$, testJobsSource$)
+  .filter((val: any) => val.payload)
+  .do(val => console.log(`received val: ${JSON.stringify(val)}`))
+  .subscribe();
 
 // teardown logic
 process.stdin.resume();
