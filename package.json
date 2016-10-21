@@ -12,11 +12,29 @@
     "compile": "tsc --outDir dist",
     "lint": "tslint -c tslint.json src/**.ts",
     "start": "npm run agent",
-    "test": "NODE_ENV=test mocha --require ts-node/register ./src/**/*.spec.ts"
+    "test": "jest",
+    "test:watch": "jest -- --watch",
+    "test:coverage": "jest -- --coverage",
+    "test:ci": "npm run compile && npm run test:coverage && codecov"
   },
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com:vire/hlad.git"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "scriptPreprocessor": "<rootDir>/preprocessor.js",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/tmp/"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/tmp"
+    ],
+    "testRegex": "/.*\\.spec.(ts)$"
   },
   "keywords": [
     "hlad",
@@ -28,32 +46,26 @@
   "author": "viliam.elischer@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "@reactivex/rxjs": "^5.0.0-beta.5",
-    "@types/chai": "^3.4.34",
-    "@types/cheerio": "^0.17.30",
-    "@types/debug": "0.0.29",
-    "@types/dotenv": "^2.0.18",
-    "@types/firebase": "^2.4.30",
-    "@types/isomorphic-fetch": "0.0.31",
-    "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.41",
-    "@types/sinon": "^1.16.31",
     "cheerio": "^0.22.0",
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",
     "firebase": "^2.4.1",
     "isomorphic-fetch": "^2.2.1",
-    "ts-node": "^1.3.0",
-    "tslint": "^3.15.1",
-    "typescript": "^2.0.3"
+    "jest": "^16.0.2",
+    "ts-node": "^1.3.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.10.1",
-    "babel-core": "^6.13.2",
-    "babel-preset-es2015": "^6.13.2",
-    "chai": "^3.2.0",
-    "mocha": "^3.1.0",
+    "@reactivex/rxjs": "^5.0.0-rc.1",
+    "@types/cheerio": "^0.17.30",
+    "@types/debug": "0.0.29",
+    "@types/dotenv": "^2.0.18",
+    "@types/firebase": "^2.4.30",
+    "@types/isomorphic-fetch": "0.0.31",
+    "@types/jest": "^15.1.32",
+    "@types/node": "^6.0.41",
+    "@types/sinon": "^1.16.31",
     "sinon": "^1.17.6",
-    "typings": "^1.4.0"
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.3"
   }
 }

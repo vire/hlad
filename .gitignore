@@ -3,6 +3,8 @@ node_modules
 # Typescript
 tmp
 dist
+coverage
+recipes
 
 # Common
 *.log

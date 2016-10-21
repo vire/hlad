@@ -8,6 +8,11 @@ const dbg = debug('hlad-crawler');
 export type crawler = (recipeHash: any, requestDelay: number) =>
   Observable<{lunchString: string, recipe: any}>;
 
+// TODO refactor to HladCrawler and other DataFetcher types
+// DataFetcher(Crawler, Extractor) => Recipe
+// |---------------------------------------|
+//
+
 export const crawler: crawler = (recipesHash, requestDelay) => {
   dbg(`got recipeHash ${JSON.stringify(recipesHash)}`);
 

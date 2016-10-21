@@ -1,21 +1,18 @@
-import * as chai from 'chai';
-import { customProviders } from './providers';
-import { getHTMLText, HTMLToLunch, objectWithKeysToArray, lunchToString } from './utils';
-const expect = chai.expect;
-
-import { HTMLText } from '../test/fixtures';
+import { customProviders } from '../providers';
+import { getHTMLText, HTMLToLunch, objectWithKeysToArray, lunchToString } from '../utils';
+import { HTMLText } from './fixtures';
 
 describe('Utils', () => {
   it('`objectWithKeysToArray` should return array of objects', () => {
-    expect(objectWithKeysToArray({})).to.deep.equal([]);
+    expect(objectWithKeysToArray({})).toEqual([]);
     expect(objectWithKeysToArray({
       a: 1
-    })).to.deep.equal([{firebaseKey: 'a'}]);
+    })).toEqual([{firebaseKey: 'a'}]);
     expect(objectWithKeysToArray({
       a: {
         b: 2
       }
-    })).to.deep.equal([{firebaseKey: 'a', b: 2}]);
+    })).toEqual([{firebaseKey: 'a', b: 2}]);
   });
 
   it('`getHTMLText` should return HTMLText', (done) => {
@@ -33,7 +30,7 @@ describe('Utils', () => {
 
     getHTMLText('http://haahha')
       .then(result => {
-        expect(result).to.equal(text);
+        expect(result).toEqual(text);
         done();
       });
   });
@@ -49,7 +46,7 @@ describe('Utils', () => {
       };
       const result = HTMLToLunch(HTMLText, recipe);
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         lunch: {
           main: ['Very tasty main dish'],
           soups: ['Some good creamy soup'],
@@ -69,7 +66,7 @@ describe('Utils', () => {
 
       const result = HTMLToLunch(HTMLText, recipe);
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         lunch: {
           main: ['Lorem Ipsum'],
           soups: [],
@@ -88,7 +85,7 @@ describe('Utils', () => {
 
       const result = HTMLToLunch(HTMLText, recipe);
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         lunch: {
           main: ['Lorem Ipsum'],
         },
@@ -106,7 +103,7 @@ describe('Utils', () => {
 
       const result = HTMLToLunch(HTMLText, recipe);
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         lunch: {
           main: [],
         },
@@ -135,7 +132,7 @@ describe('Utils', () => {
       const str = '\n*MyTest*\n\n> :stew: Gazpacho' +
         '\n> :poultry_leg: Spaghetti bolognese' +
         '\n> :hamburger: big kahuna burger\n\n';
-      expect(lunchToString(recipeWithLunch)).to.equal(str);
+      expect(lunchToString(recipeWithLunch)).toEqual(str);
     });
 
     it('soup only', () => {
@@ -151,7 +148,7 @@ describe('Utils', () => {
         }
       };
       const str = '\n*MyTest*\n\n> :stew: Gazpacho\n\n';
-      expect(lunchToString(recipeWithLunch)).to.equal(str);
+      expect(lunchToString(recipeWithLunch)).toEqual(str);
     });
 
     it('main only', () => {
@@ -169,7 +166,7 @@ describe('Utils', () => {
       };
       const str = '\n*MyTest*\n\n> :poultry_leg: Spaghetti bolognese' +
         '\n> :hamburger: big kahuna burger\n\n';
-      expect(lunchToString(recipeWithLunch)).to.equal(str);
+      expect(lunchToString(recipeWithLunch)).toEqual(str);
     });
   });
 });

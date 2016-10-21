@@ -1,6 +1,8 @@
 # HLAD
 
-is an application for managing & executing crawl jobs and sending results as messages to Slack channels.
+an application for managing & executing crawl jobs and piping results to Slack channels.
+
+[![Build Status](https://travis-ci.org/vire/hlad.svg?branch=master)](https://travis-ci.org/vire/hlad) [![codecov](https://codecov.io/gh/vire/hlad/branch/master/graph/badge.svg)](https://codecov.io/gh/vire/hlad)
 
 This repo is proposed to be cloned/forked & modified to fit your needs
 * [PREREQUISITES]

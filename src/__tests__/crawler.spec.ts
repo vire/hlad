@@ -1,11 +1,8 @@
 import { TestScheduler } from '@reactivex/rxjs/dist/cjs/testing/TestScheduler';
-import * as chai from 'chai';
 
-import { customProviders } from './providers';
-import { crawler } from './crawler';
-import { HTMLText, structure } from '../test/fixtures';
-
-const expect = chai.expect;
+import { customProviders } from '../providers';
+import { crawler } from '../crawler';
+import { HTMLText, structure } from './fixtures';
 
 describe('crawler', () => {
   it('should return an CrawlerRecipe', () => {
@@ -59,7 +56,7 @@ describe('crawler', () => {
     ];
 
     source.switchMap(crawler).subscribe((item) => {
-      expect(item).to.deep.equal(expected.shift());
+      expect(item).toEqual(expected.shift());
     });
 
     scheduler.flush();

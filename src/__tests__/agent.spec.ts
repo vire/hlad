@@ -1,10 +1,8 @@
 import { TestScheduler } from '@reactivex/rxjs/dist/cjs/testing/TestScheduler';
 import * as Rx from '@reactivex/rxjs';
-import * as chai from 'chai';
 import * as sinon from 'sinon';
 
-import { createAgent, FirebaseEvent} from './agent';
-const expect = chai.expect;
+import { createAgent, FirebaseEvent} from '../agent';
 const valueStub = sinon.stub();
 
 valueStub
@@ -52,14 +50,14 @@ describe('createAgent', () => {
     const source = scheduler.createHotObservable('--a--|');
 
     createAgent(firebaseMock);
-    expect(source).to.be.an.instanceof(Rx.Subject);
+    expect(source).toBeInstanceOf(Rx.Subject);
     const subscription = source.switchMap((x) => createAgent(firebaseMock)).subscribe((item) => {
-      expect(item).to.deep.equal(expected.shift());
+      expect(item).toEqual(expected.shift());
     });
 
     scheduler.flush();
     subscription.unsubscribe(); // triggers 2nd set
-    expect(expected.length).to.equal(0);
-    expect(setSpy.callCount).to.equal(2);
+    expect(expected.length).toEqual(0);
+    expect(setSpy.callCount).toEqual(2);
   });
 });
