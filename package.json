@@ -12,10 +12,8 @@
     "compile": "tsc --outDir dist",
     "lint": "tslint -c tslint.json src/**.ts",
     "start": "npm run agent",
-    "test": "jest",
-    "test:watch": "jest -- --watch",
-    "test:coverage": "jest -- --coverage",
-    "test:ci": "npm run compile && npm run test:coverage && codecov"
+    "test": "node scripts/test.js",
+    "test:ci": "npm run compile && npm run test && codecov"
   },
   "repository": {
     "type": "git",
@@ -29,10 +27,7 @@
     ],
     "scriptPreprocessor": "<rootDir>/preprocessor.js",
     "modulePathIgnorePatterns": [
-      "<rootDir>/tmp/"
-    ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/tmp"
+      "<rootDir>/(dist|tmp|node_modules)/"
     ],
     "testRegex": "/.*\\.spec.(ts)$"
   },
