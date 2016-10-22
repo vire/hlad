@@ -1,10 +1,16 @@
 import { fetch } from './providers';
 import * as cheerio from 'cheerio';
-import * as debug from 'debug';
+import * as dbg from 'debug';
 
-const dbg = debug('hlad-utils');
+const debug = dbg('hlad-utils');
 
-const containsBurger = str => str.toLowerCase().indexOf('burger') !== -1;
+
+type FirebaseHash = {
+  /*
+   Hash with key as firebase node name `recipes`, and value the recipe itself
+   */
+  [key: string]: any;
+}
 
 type Lunch = {
   main?: string[];
@@ -18,6 +24,8 @@ type LunchRecipe = {
   };
   lunch: Lunch;
 }
+
+const containsBurger = str => str.toLowerCase().indexOf('burger') !== -1;
 
 export const lunchToString = ({recipe, lunch}: LunchRecipe): string => {
   const start = `\n*${recipe.name}*\n\n`;
@@ -46,8 +54,8 @@ export const lunchToString = ({recipe, lunch}: LunchRecipe): string => {
 
   }
 
-  dbg(`soups: ${soups}`);
-  dbg(`main: ${main}`);
+  debug(`soups: ${soups}`);
+  debug(`main: ${main}`);
 
   if (soups && main) {
     return `${start}${soups}${main}\n`;
@@ -56,7 +64,7 @@ export const lunchToString = ({recipe, lunch}: LunchRecipe): string => {
   return soups || main ? `${start}${soups || main}\n` : '';
 };
 
-export const HTMLToLunch = (HTMLString, recipe): CrawledRecipe => {
+export const HTMLToLunch = (HTMLString, recipe): ExtractedLunch => {
   const $ = cheerio.load(HTMLString);
   const lunch = {};
 
@@ -65,29 +73,17 @@ export const HTMLToLunch = (HTMLString, recipe): CrawledRecipe => {
     return { lunch, recipe };
   }
 
-  Object.keys(recipe.structure).forEach(type => {
-    lunch[type] = recipe.structure[type]
+  Object.keys(recipe.structure).forEach((mealType: string) => {
+    lunch[mealType] = recipe.structure[mealType]
       .map(item => $(item.locator).text().trim())
-      .filter(t => t !== '');
+      .filter(Boolean);
   });
 
-  dbg('Got lunch', JSON.stringify(lunch));
+  debug(`Extracted lunch: ${JSON.stringify(lunch)} from HTML`);
   return { lunch, recipe };
 };
 
 export const getHTMLText = (URL) => fetch(URL).then(resp => resp.text());
-
-interface FirebaseHash {
-  /*
-   Hash with key as firebase node name `recipes`, and value the recipe itself
-   */
-  [key: string]: any;
-}
-
-
-export interface FirebaseTest {
-  firebaseKey: string;
-}
 
 export const objectWithKeysToArray = (hash: FirebaseHash): Array<FirebaseRecipe | FirebaseTest> =>
   Object.keys(hash).map(firebaseKey => Object.assign({}, hash[firebaseKey], { firebaseKey }));

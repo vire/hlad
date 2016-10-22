@@ -79,7 +79,7 @@ This repo is proposed to be cloned/forked & modified to fit your needs
 
 > Tried to use a most simple and lightweight solution for storing data. Firebase handles such use-case very good + offers real-time out-of-the-box.
 
-**Agent**: run locally, observes firebase for changes, reacts to such changes, notifies firebase when app on/off.
+**Agent**: run locally, observes firebase for changes, reacts to such changes.
 
 **Executors**: stream pipelines, that handle e2e when event arrives, execute pre-defined steps, publish result to desired endpoint (firebase, slack). 2 basic types of executors:
   - `TEST_JOB` real-time test for newly created `recipes`

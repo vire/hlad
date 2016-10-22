@@ -59,8 +59,14 @@
     "@types/jest": "^15.1.32",
     "@types/node": "^6.0.41",
     "@types/sinon": "^1.16.31",
+    "cz-conventional-changelog": "^1.2.0",
     "sinon": "^1.17.6",
     "tslint": "^3.15.1",
     "typescript": "^2.0.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

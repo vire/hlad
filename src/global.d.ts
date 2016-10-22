@@ -1,15 +1,19 @@
-interface FirebaseMock {
+declare interface FirebaseMock {
   child(str: string): any;
-  set(val, cb): void;
   on(event, dataCb, errCb): void;
+  set(val, cb): void;
 }
 
-declare interface FirebaseRecipe {
+declare type FirebaseTest = {
+  firebaseKey: string;
+}
+
+declare type FirebaseRecipe = {
   firebaseKey: string;
   URL: string;
 }
 
-declare interface CrawledRecipe {
+declare type ExtractedLunch = {
+  lunch: {};
   recipe: any;
-  lunch: any;
 }

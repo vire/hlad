@@ -1,9 +1,9 @@
-import { Observable } from '@reactivex/rxjs';
-import * as Firebase from 'firebase';
+import * as dbg from 'debug';
 import { config } from 'dotenv';
-import * as debug from 'debug';
+import * as Firebase from 'firebase';
+import { Observable } from '@reactivex/rxjs';
 
-import { createAgent, FirebaseEvent } from './src/agent';
+import { createAgent, RECEIVED_CRAWL_JOBS, RECEIVED_TEST_JOBS } from './src/agent';
 import { crawler } from './src/crawler';
 import { publish } from './src/publisher';
 
@@ -11,14 +11,12 @@ if (process.env.NODE_ENV !== 'production') {
   config();
 }
 
-const dbg = debug(`hlad-main`);
+const debug = dbg('hlad-main');
 const firebaseRef = new Firebase(`https://${process.env.FIREBASE_ID}.firebaseio.com`);
-const RECEIVED_CRAWL_JOBS = 'RECEIVED_CRAWL_JOBS';
-const RECEIVED_TEST_JOBS = 'RECEIVED_TEST_JOBS';
-const CRAWL_JOBS = 'crawl_jobs';
-const TEST_JOBS = 'test_jobs';
-const TEST_RESULTS = 'test_results';
-const RECIPES = 'recipes';
+const CRAWL_JOBS_KEY = 'crawl_jobs';
+const TEST_JOBS_KEY = 'test_jobs';
+const TEST_RESULTS_KEY = 'test_results';
+const RECIPES_KEY = 'recipes';
 const ENDPOINT_SETTINGS = {
   URL: process.env.API_URL,
   token: process.env.API_TOKEN,
@@ -26,94 +24,76 @@ const ENDPOINT_SETTINGS = {
 };
 
 // don't log tokens and channels
-dbg(`Publish endpoint: ${JSON.stringify(process.env.API_UR)}`);
+debug(`Publish endpoint: ${JSON.stringify(process.env.API_UR)}`);
 
-const agentSource$ = createAgent(firebaseRef).share();
+const agent$ = createAgent(firebaseRef).share();
 
 // pick recipe from firebase for further processing in `crawlJobsSource$`
-const recipeSource$ = Observable.create(observer => {
+const recipes$ = Observable.create(observer => {
   firebaseRef
-    .child(RECIPES)
+    .child(RECIPES_KEY)
     .on('value', recipesSnapshot => {
-      const payload = recipesSnapshot.val();
-      observer.next(payload);
-    }, recipesError => observer.error(recipesError));
+      const recipes = recipesSnapshot.val();
+      debug(`Received recipes: ${recipes}`);
+      observer.next(recipes);
+    }, recipesError => {
+      debug(`Error when fetching recipes: ${recipesError}`);
+      observer.error({ type: 'RECIPES_FETCH_ERROR', error: recipesError})
+    });
 });
 
 // call URL from recipe, and parse HTMLText response with recipe definition and remove crawlJob
 // publish to endpoint based on `ENDPOINT_SETTINGS`
-const crawlJobsSource$ = agentSource$
-  .filter(({ payload, type }) => payload && type === FirebaseEvent.RECEIVED_CRAWL_JOBS)
-  .do(val => dbg(`crawlJobsSource$ value: ${JSON.stringify(val)}`))
+const crawlJobsSource$ = agent$
+  .filter(({ payload, type }) => payload && type === RECEIVED_CRAWL_JOBS)
+  .do(val => debug(`crawlJobsSource$ value: ${JSON.stringify(val)}`))
   .switchMap(
-    // once new job arrives
-    crawlJob => recipeSource$.flatMap(recipesHash => crawler(recipesHash, 200))
+    // fire on crawlJob
+    crawlJob => recipes$.flatMap(recipesHash => crawler(recipesHash, 200))
   )
   .do((payload: any) => {
     publish(ENDPOINT_SETTINGS, payload.lunchString);
-    dbg(`Removing finished crawlJ ${CRAWL_JOBS}`);
+    debug(`Removing finished crawlJob ${CRAWL_JOBS_KEY}`);
     firebaseRef
-      .child(CRAWL_JOBS)
+      .child(CRAWL_JOBS_KEY)
       .remove();
   });
 
 
-// call URL from recipe, parse response, post results to TEST_RESULTS
-const testJobsSource$ = agentSource$
-  .filter(val => val.payload && val.type === FirebaseEvent.RECEIVED_TEST_JOBS)
+// Logic for testing recipes
+
+// call URL from recipe, parse response, post results to TEST_RESULTS_KEY
+const testJobsSource$ = agent$
+  .filter(({ payload, type }) => payload && type === RECEIVED_TEST_JOBS)
   .flatMap(({ payload }) => crawler(payload, 0))
   .do((result: any) => {
-    const firebaseKey = Object.keys(result.recipe)[0];
+    const [ firebaseKey ] = Object.keys(result.recipe);
 
     if (!firebaseKey) {
-      console.error('Missing or Invalid firebase key!');
+      debug('Missing testJob firebaseKey!');
       return;
     }
 
-    dbg(`firebaseKey ${firebaseKey}`);
+    debug(`Processing testJob: ${firebaseKey}`);
     firebaseRef
-      .child(`${TEST_RESULTS}`)
+      .child(`${TEST_RESULTS_KEY}`)
       .push()
       .set({
-        pendingTestResultKey: firebaseKey,
+        pendingTestResultKey: firebaseKey, // pendingTestResultKey is used by hlad-ui for paring requests
         result: result.lunchString,
       }, (resultsErr) => {
         if (resultsErr) {
-          dbg(`${TEST_RESULTS} error: ${resultsErr}`);
+          debug(`${TEST_RESULTS_KEY} error: ${resultsErr}`);
         } else {
-          dbg(`Removing test ${firebaseKey}`);
+          debug(`Removing testJob: ${firebaseKey}`);
           firebaseRef
-            .child(`${TEST_JOBS}/${firebaseKey}`)
+            .child(`${TEST_JOBS_KEY}/${firebaseKey}`)
             .remove();
         }
       });
   });
 
-const subscription = Observable.merge(crawlJobsSource$, testJobsSource$)
+Observable.merge(crawlJobsSource$, testJobsSource$)
   .filter((val: any) => val.payload)
-  .do(val => console.log(`received val: ${JSON.stringify(val)}`))
+  .do(val => debug(`Value after processing: ${JSON.stringify(val)}`))
   .subscribe();
-
-// teardown logic
-process.stdin.resume();
-
-process.on('exit', function () {
-  dbg('Unsubscribe agent from firebase');
-  subscription.unsubscribe();
-});
-
-process.on('SIGINT', () => {
-  dbg('Got SIGINT.  Press Control-D to exit.');
-  process.exit(2);
-});
-
-process.on('SIGTERM', () => {
-  dbg('Got SIGTERM');
-  process.exit(2);
-});
-
-process.on('uncaughtException', (uErr) => {
-  dbg('Uncaught Exception...');
-  dbg(uErr.stack);
-  process.exit(99);
-});

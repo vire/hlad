@@ -2,7 +2,7 @@ import { TestScheduler } from '@reactivex/rxjs/dist/cjs/testing/TestScheduler';
 import * as Rx from '@reactivex/rxjs';
 import * as sinon from 'sinon';
 
-import { createAgent, FirebaseEvent} from '../agent';
+import { createAgent, RECEIVED_CRAWL_JOBS, RECEIVED_TEST_JOBS, FirebaseEvent} from '../agent';
 const valueStub = sinon.stub();
 
 valueStub
@@ -23,10 +23,6 @@ const firebaseMock: FirebaseMock = {
   }
 };
 
-interface FirebasePayload {
-  type: FirebaseEvent;
-  payload: any;
-}
 
 let setSpy;
 
@@ -37,12 +33,13 @@ describe('createAgent', () => {
   });
 
   it('pushes values to `crawlJob` and `testJobs`', () => {
-    const expected: Array<FirebasePayload> = [
+    const expected: FirebaseEvent[] = [
       {
-        type: FirebaseEvent.RECEIVED_CRAWL_JOBS,
+        type: 'RECEIVED_CRAWL_JOBS',
         payload: 'hash of crawl jobs'
-      },      {
-        type: FirebaseEvent.RECEIVED_TEST_JOBS,
+      },
+      {
+        type: 'RECEIVED_TEST_JOBS',
         payload: 'hash of test jobs'
       },
     ];
@@ -51,6 +48,7 @@ describe('createAgent', () => {
 
     createAgent(firebaseMock);
     expect(source).toBeInstanceOf(Rx.Subject);
+
     const subscription = source.switchMap((x) => createAgent(firebaseMock)).subscribe((item) => {
       expect(item).toEqual(expected.shift());
     });
@@ -58,6 +56,5 @@ describe('createAgent', () => {
     scheduler.flush();
     subscription.unsubscribe(); // triggers 2nd set
     expect(expected.length).toEqual(0);
-    expect(setSpy.callCount).toEqual(2);
   });
 });

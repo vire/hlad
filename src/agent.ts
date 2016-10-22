@@ -1,61 +1,50 @@
 import { Observable } from '@reactivex/rxjs';
-import * as debug from 'debug';
+import * as dbg from 'debug';
 
-export enum FirebaseEvent {
-  RECEIVED_CRAWL_JOBS,
-  RECEIVED_TEST_JOBS
+const debug = dbg('hlad-agent');
+const CRAWL_JOBS_KEY = 'crawl_jobs';
+const TEST_JOBS_KEY = 'test_jobs';
+
+// actions
+export const RECEIVED_CRAWL_JOBS = 'RECEIVED_CRAWL_JOBS';
+export const RECEIVED_TEST_JOBS = 'RECEIVED_TEST_JOBS';
+export const CRAWL_JOBS_FETCH_ERROR = 'CRAWL_JOBS_FETCH_ERROR';
+export const TEST_JOBS_FETCH_ERROR = 'TEST_JOBS_FETCH_ERROR';
+
+export type FirebaseEvent = {
+  type: 'RECEIVED_CRAWL_JOBS' | 'RECEIVED_TEST_JOBS' | 'CRAWL_JOBS_FETCH_ERROR' | 'TEST_JOBS_FETCH_ERROR';
+  payload: any;
 }
 
-const AGENT_KEY = 'agent';
-const dbg = debug(`hlad-${AGENT_KEY}`);
-const CRAWL_JOBS = 'crawl_jobs';
-const TEST_JOBS = 'test_jobs';
-
-export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<any> {
+export function createAgent(firebaseRef: Firebase | FirebaseMock): Observable<FirebaseEvent> {
   return Observable.create(observer => {
-    dbg('starting agent');
+    debug('Creating Agent observable');
 
-    // as first thing, we notify Firebase, about agent being ready.
+    // notify observer when a CRAWL_JOB event arrives to Firebase
     firebaseRef
-      .child(AGENT_KEY)
-      .set({ active: true }, updateError => {
-        if (!updateError) {
+      .child(CRAWL_JOBS_KEY)
+      .on('value', crawJobsSnapshot => {
+          const payload = crawJobsSnapshot.val();
+          debug(`Endpoint ${CRAWL_JOBS_KEY} emitted value: ${JSON.stringify(payload)}`);
+          observer.next({
+            type: RECEIVED_CRAWL_JOBS,
+            payload,
+          });
+        },
+        crawlJobsErr => observer.error({type: CRAWL_JOBS_FETCH_ERROR, error: crawlJobsErr}));
 
-          // notify observer when a CRAWL_JOB event arrives to Firebase
-          firebaseRef
-            .child(CRAWL_JOBS)
-            .on('value', crawJobsSnapshot => {
-              const payload = crawJobsSnapshot.val();
-              observer.next({
-                type: FirebaseEvent.RECEIVED_CRAWL_JOBS,
-                payload,
-              });
-            }, crawlJobsErr => observer.error(crawlJobsErr));
-
-          // notify observer when a TEST_JOB event occurs
-          firebaseRef
-            .child(TEST_JOBS)
-            .on('value',
-              testJobsSnapshot => {
-                const payload = testJobsSnapshot.val();
-                dbg(`Firebase - test_job ${JSON.stringify(payload)}`);
-                observer.next({
-                  type: FirebaseEvent.RECEIVED_TEST_JOBS,
-                  payload
-                });
-              },
-              testJobsErr => observer.error(testJobsErr));
-        } else {
-          dbg('could not start agent: ', updateError);
-        }
-      });
-
-    // Gracefully shutdown agent + set his presence on Firebase as inactive
-    return () => {
-      dbg('stopping agent');
-      firebaseRef
-        .child(AGENT_KEY)
-        .set({ active: false }, () => {});
-    };
+    // notify observer when a TEST_JOB event occurs
+    firebaseRef
+      .child(TEST_JOBS_KEY)
+      .on('value',
+        testJobsSnapshot => {
+          const payload = testJobsSnapshot.val();
+          debug(`Endpoint ${TEST_JOBS_KEY} emitted value: ${JSON.stringify(payload)}`);
+          observer.next({
+            type: RECEIVED_TEST_JOBS,
+            payload
+          });
+        },
+        testJobsErr => observer.error({type: TEST_JOBS_FETCH_ERROR, error: testJobsErr}));
   });
 }
