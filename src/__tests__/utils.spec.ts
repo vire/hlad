@@ -1,4 +1,4 @@
-import { customProviders } from '../providers';
+jest.mock('isomorphic-fetch');
 import { getHTMLText, HTMLToLunch, objectWithKeysToArray, lunchToString } from '../utils';
 import { HTMLText } from './fixtures';
 
@@ -15,24 +15,11 @@ describe('Utils', () => {
     })).toEqual([{firebaseKey: 'a', b: 2}]);
   });
 
-  it('`getHTMLText` should return HTMLText', (done) => {
+  it('`getHTMLText` should return HTMLText', () => {
+    require('isomorphic-fetch').returnText = 'mocked-text'; // instrument the mock
 
-    const text = 'sample text should be HTML';
-    customProviders.fetch = (URL) => {
-      return new Promise((res, rej) => {
-        res({
-          text() {
-            return text;
-          }
-        });
-      });
-    };
-
-    getHTMLText('http://haahha')
-      .then(result => {
-        expect(result).toEqual(text);
-        done();
-      });
+    return getHTMLText('http://foo.bar')
+      .then(result => expect(result).toEqual('mocked-text'));
   });
 
   describe('`HTMLToLunch`', () => {

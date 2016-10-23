@@ -1,19 +1,18 @@
 import { Observable } from '@reactivex/rxjs';
-import * as debug from 'debug';
+import * as dbg from 'debug';
 
 import { getHTMLText, HTMLToLunch, objectWithKeysToArray, lunchToString } from './utils';
 
-const dbg = debug('hlad-crawler');
+const debug = dbg('hlad-crawler');
 
 export type crawler = (recipeHash: any, requestDelay: number) =>
   Observable<{lunchString: string, recipe: any}>;
 
 export const crawler: crawler = (recipesHash, requestDelay) => {
-  dbg(`got recipeHash ${JSON.stringify(recipesHash)}`);
+  debug(`Recipes for crawl: ${JSON.stringify(recipesHash, null, 2)}`);
 
   return Observable.from(objectWithKeysToArray(recipesHash))
     .flatMap((recipe: FirebaseRecipe, idx) => {
-      dbg('recipe in crawler', JSON.stringify(recipe));
       const reqSource$ = Observable.fromPromise(getHTMLText(recipe.URL));
 
       if (requestDelay) {

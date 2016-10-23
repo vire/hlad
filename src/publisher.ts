@@ -1,8 +1,9 @@
 import { Observable } from '@reactivex/rxjs';
 import * as fetch from 'isomorphic-fetch';
-import * as querystring from 'querystring';
-import * as debug from 'debug';
-const dbg = debug('hlad-publisher');
+import { stringify } from 'qs';
+import * as dbg from 'debug';
+
+const debug = dbg('hlad-publisher');
 
 type settings = {
   URL: string,
@@ -13,10 +14,8 @@ type settings = {
 export type publish = (settings: settings, lunchString: string) => Observable<any>
 
 export const publish = ({URL, token, channel}, lunchString) => {
-  dbg(`lunchString: ${lunchString}`);
-
   // slack specific
-  const queryParams = querystring.stringify({
+  const queryParams = stringify({
     username: 'HLAD-BOT', // TODO can be configurable
     icon_emoji: ':hamburger:',
     token: token,
@@ -24,7 +23,8 @@ export const publish = ({URL, token, channel}, lunchString) => {
     as_user: false,
     text: lunchString,
   });
-  dbg('posting lunch to endpoint');
+
+  debug(`Publishing lunchString ${JSON.stringify(lunchString)} to endpoint: ${URL}`);
 
   return Observable.fromPromise(
     fetch(`${URL}?${queryParams}`, {

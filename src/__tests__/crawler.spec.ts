@@ -1,20 +1,12 @@
+jest.mock('isomorphic-fetch');
 import { TestScheduler } from '@reactivex/rxjs/dist/cjs/testing/TestScheduler';
 
-import { customProviders } from '../providers';
 import { crawler } from '../crawler';
 import { HTMLText, structure } from './fixtures';
 
 describe('crawler', () => {
   it('should return an CrawlerRecipe', () => {
-    customProviders.fetch = (URL) => {
-      return new Promise((res, rej) => {
-        res({
-          text() {
-            return HTMLText;
-          }
-        });
-      });
-    };
+    require('isomorphic-fetch').returnText = HTMLText; // instrument the mock
 
     const scheduler = new TestScheduler(null);
     const source = scheduler.createHotObservable('--a-----|', { a: {

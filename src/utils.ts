@@ -1,9 +1,8 @@
-import { fetch } from './providers';
+import * as fetch from 'isomorphic-fetch';
 import * as cheerio from 'cheerio';
 import * as dbg from 'debug';
 
 const debug = dbg('hlad-utils');
-
 
 type FirebaseHash = {
   /*
@@ -53,9 +52,6 @@ export const lunchToString = ({recipe, lunch}: LunchRecipe): string => {
       .reduce((p, c) => `${p}${c}\n`, '');
 
   }
-
-  debug(`soups: ${soups}`);
-  debug(`main: ${main}`);
 
   if (soups && main) {
     return `${start}${soups}${main}\n`;

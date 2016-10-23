@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import * as Firebase from 'firebase';
 import { Observable } from '@reactivex/rxjs';
 
-import { createAgent, RECEIVED_CRAWL_JOBS, RECEIVED_TEST_JOBS } from './src/agent';
+import { createAgent, RECEIVED_CRAWL_JOBS, RECEIVED_TEST_JOBS, CRAWL_JOBS_REQUEST } from './src/agent';
 import { crawler } from './src/crawler';
 import { publish } from './src/publisher';
 
@@ -24,11 +24,11 @@ const ENDPOINT_SETTINGS = {
 };
 
 // don't log tokens and channels
-debug(`Publish endpoint: ${JSON.stringify(process.env.API_UR)}`);
+debug(`Publish endpoint: ${JSON.stringify(process.env.API_URL)}`);
 
 const agent$ = createAgent(firebaseRef).share();
 
-// pick recipe from firebase for further processing in `crawlJobsSource$`
+// pick recipe from firebase for further processing in `crawlJobs$`
 const recipes$ = Observable.create(observer => {
   firebaseRef
     .child(RECIPES_KEY)
@@ -44,8 +44,8 @@ const recipes$ = Observable.create(observer => {
 
 // call URL from recipe, and parse HTMLText response with recipe definition and remove crawlJob
 // publish to endpoint based on `ENDPOINT_SETTINGS`
-const crawlJobsSource$ = agent$
-  .filter(({ payload, type }) => payload && type === RECEIVED_CRAWL_JOBS)
+const crawlJobs$ = agent$
+  .filter(({ payload, eventType }) => payload && eventType === RECEIVED_CRAWL_JOBS)
   .do(val => debug(`crawlJobsSource$ value: ${JSON.stringify(val)}`))
   .switchMap(
     // fire on crawlJob
@@ -60,11 +60,19 @@ const crawlJobsSource$ = agent$
   });
 
 
+const crawlJobRequest$ = agent$
+  .filter(({ eventType }) => eventType === CRAWL_JOBS_REQUEST)
+  .do(val => debug(`crawlJobRequest$ value: ${JSON.stringify(val)}`))
+  .switchMap(crawlJob => recipes$.flatMap(recipesHash => crawler(recipesHash, 200)))
+  .do((payload: any) => {
+    publish(ENDPOINT_SETTINGS, payload.lunchString);
+  });
+
 // Logic for testing recipes
 
 // call URL from recipe, parse response, post results to TEST_RESULTS_KEY
-const testJobsSource$ = agent$
-  .filter(({ payload, type }) => payload && type === RECEIVED_TEST_JOBS)
+const testJobs$ = agent$
+  .filter(({ payload, eventType }) => payload && eventType === RECEIVED_TEST_JOBS)
   .flatMap(({ payload }) => crawler(payload, 0))
   .do((result: any) => {
     const [ firebaseKey ] = Object.keys(result.recipe);
@@ -93,7 +101,7 @@ const testJobsSource$ = agent$
       });
   });
 
-Observable.merge(crawlJobsSource$, testJobsSource$)
+Observable.merge(crawlJobs$, crawlJobRequest$, testJobs$)
   .filter((val: any) => val.payload)
   .do(val => debug(`Value after processing: ${JSON.stringify(val)}`))
   .subscribe();

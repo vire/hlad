@@ -2,6 +2,8 @@ import { TestScheduler } from '@reactivex/rxjs/dist/cjs/testing/TestScheduler';
 import * as Rx from '@reactivex/rxjs';
 import * as sinon from 'sinon';
 
+jest.mock('http');
+
 import { createAgent, RECEIVED_CRAWL_JOBS, RECEIVED_TEST_JOBS, FirebaseEvent} from '../agent';
 const valueStub = sinon.stub();
 
@@ -29,19 +31,15 @@ let setSpy;
 describe('createAgent', () => {
 
   beforeEach(() => {
+    process.env.HLAD_TOKEN = 'test-token';
     setSpy = sinon.spy(firebaseMock, 'set');
   });
 
   it('pushes values to `crawlJob` and `testJobs`', () => {
     const expected: FirebaseEvent[] = [
-      {
-        type: 'RECEIVED_CRAWL_JOBS',
-        payload: 'hash of crawl jobs'
-      },
-      {
-        type: 'RECEIVED_TEST_JOBS',
-        payload: 'hash of test jobs'
-      },
+      { eventType: 'CRAWL_JOBS_REQUEST' },
+      { eventType: 'RECEIVED_CRAWL_JOBS', payload: 'hash of crawl jobs'},
+      { eventType: 'RECEIVED_TEST_JOBS', payload: 'hash of test jobs'}
     ];
     const scheduler = new TestScheduler(null);
     const source = scheduler.createHotObservable('--a--|');
